@@ -35,8 +35,11 @@ const edit=async(ds,p)=>{const cur=[];for(let i=0;i<p.length;i+=2)cur.push(hm(p[
  box.load();return box}
 function user(){const st=h('p'),b=h('button',{class:'big',onclick:async()=>{try{await api('punch',{kind:b.dataset.k});await t();c.load()}catch(x){alert(x.message)}}}),c=cal(me.id,false);
  async function t(){const d=await api('today'),l=d.p.at(-1),k=l&&l.kind==='in'?'out':'in';b.dataset.k=k;b.textContent=k==='in'?'Marcar ENTRADA':'Marcar SAÍDA';st.textContent=d.p.map(x=>(x.kind==='in'?'E ':'S ')+hm(x.ts)).join(' · ')||'Sem marcações hoje'}
- show(head(),h('p',{},b),st,c);t().catch(()=>{})}
+ const vr=h('div'),a=h('input',{type:'date'}),z=h('input',{type:'date'});
+ async function lv(){const d=await api('vr');vr.replaceChildren(...d.r.map(x=>h('div',{},`${x.d1} → ${x.d2}: ${{pend:'pendente',ok:'aprovado',no:'recusado',can:'cancelado'}[x.st]} `,x.st==='pend'&&btn('Cancelar',async()=>{await api(`vr/${x.id}/cancel`,{});lv()}))))}
+ show(head(),h('p',{},b),st,c,h('h3',{},'Pedir férias'),h('p',{},a,z,btn('Pedir',async()=>{await api('vr',{from:a.value,to:z.value});lv()})),vr);t().catch(()=>{});lv().catch(()=>{})}
 function admin(){const list=h('div'),det=h('div'),link=t=>prompt('Envie este link ao utilizador (válido 48h):',location.origin+location.pathname+'#invite='+t);
+const pr=h('div');async function lp(){const d=await api('vr/all');pr.replaceChildren(h('h3',{},`Pedidos de férias (${d.r.length})`),...d.r.map(x=>h('div',{},`${x.name}: ${x.d1} → ${x.d2} `,btn('Aprovar',async()=>{await api(`vr/${x.id}/decide`,{ok:1});lp()}),btn('Recusar',async()=>{await api(`vr/${x.id}/decide`,{ok:0});lp()}))))}
  async function ref(){const d=await api('users');list.replaceChildren(h('table',{},...d.users.map(u=>h('tr',{},h('td',{},`${u.name} (${u.username})`+(u.role==='admin'?' ★':'')+(u.pending?' [pendente]':'')+(u.active?'':' [inativo]')),
   h('td',{},btn('Ver',()=>sel(u)),u.role==='user'&&btn('Convite/Repor',async()=>link((await api(`users/${u.id}/invite`,{})).token)),u.role==='user'&&btn(u.active?'Desativar':'Ativar',async()=>{await api(`users/${u.id}/active`,{active:u.active?0:1});ref()}))))))}
  function sel(u){const f=h('input',{type:'file',accept:'.csv,.txt'}),a=h('input',{type:'date'}),z=h('input',{type:'date'});
@@ -46,6 +49,7 @@ function admin(){const list=h('div'),det=h('div'),link=t=>prompt('Envie este lin
     if(!rows.length)throw Error('Nenhuma linha válida no ficheiro');for(let i=0;i<rows.length;i+=400)await api('schedule/'+u.id,{rows:rows.slice(i,i+400)});alert(rows.length+' de '+L.length+' linhas gravadas');sel(u)})),
    h('p',{},h('b',{},'Férias: '),a,z,btn('Marcar',async()=>{const d=await api('vacation/'+u.id,{from:a.value,to:z.value});alert(d.n+' dias de férias');sel(u)})))}
  const nm=h('input',{placeholder:'Nome',maxlength:60}),un=h('input',{placeholder:'utilizador',maxlength:30});
- show(head(),h('h3',{},'Novo utilizador'),h('div',{},nm,un,btn('Criar',async()=>{const d=await api('users',{name:nm.value,username:un.value});nm.value=un.value='';link(d.token);ref()})),list,det);ref().catch(x=>alert(x.message))}
+ show(head(),pr,h('h3',{},'Novo utilizador'),h('div',{},nm,un,btn('Criar',async()=>{const d=await api('users',{name:nm.value,username:un.value});nm.value=un.value='';link(d.token);ref()})),list,det);ref().catch(x=>alert(x.message));lp().catch(()=>{})}
 (async()=>{const m=location.hash.match(/^#invite=([\w-]{20,})$/);if(m){history.replaceState(null,'',location.pathname);return activate(m[1])}
  if(tok)try{me=await api('me');return me.role==='admin'?admin():user()}catch{}login()})();
+
