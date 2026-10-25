@@ -35,6 +35,13 @@ const edit=async(ds,p)=>{const cur=[];for(let i=0;i<p.length;i+=2)cur.push(hm(p[
     miss&&(j?(adm?btn('Ver foto',()=>photo(j)):h('small',{},'Justificada')):(adm?h('small',{},'Falta'):btn('Justificar',()=>just(ds))))))}
   box.replaceChildren(h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},m),btn('▶',()=>go(1))),g)}catch(x){alert(x.message)}};
  box.load();return box}
+function dcal(id,name){const box=h('div'),td=new Date().toLocaleDateString('sv-SE');let m=td.slice(0,7);
+ const go=n=>{const[y,mo]=m.split('-').map(Number),d=new Date(y,mo-1+n,1);m=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');box.load()};
+ box.load=async()=>{try{const d=await api(`deptmonth/${id}?m=${m}`),by={};d.r.forEach(x=>(by[x.day]=by[x.day]||[]).push(x));const[y,mo]=m.split('-').map(Number),n=new Date(y,mo,0).getDate(),f=(new Date(y,mo-1,1).getDay()+6)%7;
+  const g=h('div',{class:'g w'},...'Seg Ter Qua Qui Sex Sáb Dom'.split(' ').map(x=>h('b',{},x)),...Array(f).fill(0).map(()=>h('i')));
+  for(let i=1;i<=n;i++){const ds=`${m}-${String(i).padStart(2,'0')}`,L=by[ds]||[];g.append(h('div',{class:'d dd'+(ds===td?' now':'')},h('b',{},i),...L.filter(x=>x.type==='T').map(x=>h('small',{class:'T'},`${x.name} ${x.start||''}-${x.end||''}`)),...L.filter(x=>x.type==='V').map(x=>h('small',{class:'V'},`Férias: ${x.name}`))))}
+  box.replaceChildren(h('h3',{},name),h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},m),btn('▶',()=>go(1))),h('div',{style:'overflow-x:auto'},g))}catch(x){alert(x.message)}};
+ box.load();return box}
 function certs(uid,adm){const box=h('div'),t=h('input',{placeholder:'Título (ex: Formação HACCP)',maxlength:80}),f=h('input',{type:'file',accept:'image/*,application/pdf'});
  const open=async x=>{const u=URL.createObjectURL(await api('cert/'+x.id,null,true));if(x.mime==='application/pdf'){const a=h('a',{href:u,download:'certificado.pdf'});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),9e3)}else document.body.append(h('img',{class:'ph',src:u,onclick:e=>{e.target.remove();URL.revokeObjectURL(u)}}))};
  const ld=async()=>{const d=await api('certs/'+uid);box.replaceChildren(h('h3',{},'Certificados de formação'),...d.r.map(x=>h('div',{},new Date(x.ts).toLocaleDateString('pt-PT')+' · '+x.title+' ',btn('Abrir',()=>open(x)),btn('Apagar',async()=>{if(confirm('Apagar?')){await api(`cert/${x.id}/del`,{});ld()}}))),...(adm?[]:[h('p',{},t,f,btn('Enviar',async()=>{const file=f.files[0];if(!file||!t.value.trim())throw Error('Indique título e ficheiro');
@@ -49,8 +56,11 @@ function user(){const st=h('p'),b=h('button',{class:'big',onclick:async()=>{try{
  show(head(),h('p',{},b),st,c,h('h3',{},'Pedir férias'),h('p',{},a,z,btn('Pedir',async()=>{await api('vr',{from:a.value,to:z.value});lv()})),vr,certs(me.id,false));t().catch(()=>{});lv().catch(()=>{})}
 function admin(){const list=h('div'),det=h('div'),link=t=>prompt('Envie este link ao utilizador (válido 48h):',location.origin+location.pathname+'#invite='+t);
 const pr=h('div');async function lp(){const d=await api('vr/all');pr.replaceChildren(h('h3',{},`Pedidos de férias (${d.r.length})`),...d.r.map(x=>h('div',{},`${x.name}: ${x.d1} → ${x.d2} `,btn('Aprovar',async()=>{await api(`vr/${x.id}/decide`,{ok:1});lp()}),btn('Recusar',async()=>{await api(`vr/${x.id}/decide`,{ok:0});lp()}))))}
- async function ref(){const d=await api('users');list.replaceChildren(h('table',{},...d.users.map(u=>h('tr',{},h('td',{},`${u.name} (${u.username})`+(u.role==='admin'?' ★':'')+(u.pending?' [pendente]':'')+(u.active?'':' [inativo]')),
-  h('td',{},btn('Ver',()=>sel(u)),u.role==='user'&&btn('Convite/Repor',async()=>link((await api(`users/${u.id}/invite`,{})).token)),u.role==='user'&&btn(u.active?'Desativar':'Ativar',async()=>{await api(`users/${u.id}/active`,{active:u.active?0:1});ref()}))))))}
+ async function ref(){const[d,e]=await Promise.all([api('users'),api('depts')]),ds=e.r,opts=u=>{const s=h('select',{onchange:async()=>{try{await api(`users/${u.id}/dept`,{dept:s.value?Number(s.value):null});ref()}catch(x){alert(x.message)}}},h('option',{value:''},'Sem departamento'),...ds.map(x=>h('option',{value:x.id},x.name)));s.value=u.dept||'';return s};
+  const row=u=>h('tr',{},h('td',{},`${u.name} (${u.username})`+(u.role==='admin'?' ★':'')+(u.pending?' [pendente]':'')+(u.active?'':' [inativo]')),
+   h('td',{},btn('Ver',()=>sel(u)),u.role==='user'&&btn('Convite/Repor',async()=>link((await api(`users/${u.id}/invite`,{})).token)),u.role==='user'&&btn(u.active?'Desativar':'Ativar',async()=>{await api(`users/${u.id}/active`,{active:u.active?0:1});ref()}),opts(u)));
+  const grp=(t,id,us)=>h('div',{},h('h4',{},`${t} (${us.length}) `,id&&btn('Ver horário',()=>det.replaceChildren(dcal(id,t))),id&&btn('Apagar dept.',async()=>{if(confirm('Apagar departamento? Os utilizadores ficam sem departamento.')){await api(`depts/${id}/del`,{});ref()}})),h('table',{},...us.map(row)));
+  list.replaceChildren(...ds.map(x=>grp(x.name,x.id,d.users.filter(u=>u.dept===x.id))),grp('Sem departamento',0,d.users.filter(u=>!u.dept)))}
  function sel(u){const f=h('input',{type:'file',accept:'.csv,.txt'}),a=h('input',{type:'date'}),z=h('input',{type:'date'});
   det.replaceChildren(h('h3',{},u.name),cal(u.id,true),certs(u.id,true),
    h('p',{},h('b',{},'Horário (CSV: data,tipo,inicio,fim — tipo T/F/V): '),f,btn('Enviar',async()=>{if(!f.files[0]||f.files[0].size>2e5)throw Error('Ficheiro inválido');
@@ -58,6 +68,6 @@ const pr=h('div');async function lp(){const d=await api('vr/all');pr.replaceChil
     if(!rows.length)throw Error('Nenhuma linha válida no ficheiro');for(let i=0;i<rows.length;i+=400)await api('schedule/'+u.id,{rows:rows.slice(i,i+400)});alert(rows.length+' de '+L.length+' linhas gravadas');sel(u)})),
    h('p',{},h('b',{},'Férias: '),a,z,btn('Marcar',async()=>{const d=await api('vacation/'+u.id,{from:a.value,to:z.value});alert(d.n+' dias de férias');sel(u)})))}
  const nm=h('input',{placeholder:'Nome',maxlength:60}),un=h('input',{placeholder:'utilizador',maxlength:30});
- show(head(),pr,h('h3',{},'Novo utilizador'),h('div',{},nm,un,btn('Criar',async()=>{const d=await api('users',{name:nm.value,username:un.value});nm.value=un.value='';link(d.token);ref()})),list,det);ref().catch(x=>alert(x.message));lp().catch(()=>{})}
+ const dn=h('input',{placeholder:'Novo departamento',maxlength:40});show(head(),pr,h('h3',{},'Novo utilizador'),h('div',{},nm,un,btn('Criar',async()=>{const d=await api('users',{name:nm.value,username:un.value});nm.value=un.value='';link(d.token);ref()})),h('h3',{},'Departamentos e utilizadores'),h('div',{},dn,btn('Criar departamento',async()=>{await api('depts',{name:dn.value});dn.value='';ref()})),list,det);ref().catch(x=>alert(x.message));lp().catch(()=>{})}
 (async()=>{const m=location.hash.match(/^#invite=([\w-]{20,})$/);if(m){history.replaceState(null,'',location.pathname);return activate(m[1])}
  if(tok)try{me=await api('me');return me.role==='admin'?admin():user()}catch{}login()})();
