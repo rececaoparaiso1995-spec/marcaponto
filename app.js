@@ -1,4 +1,4 @@
-const API='https://ponto-api.O_TEU_SUBDOMINIO.workers.dev';
+const API='https://ponto-api.rececaoparaiso1995.workers.dev';
 const $=document.getElementById('app');
 const h=(t,p={},...k)=>{const e=document.createElement(t);for(const[a,v]of Object.entries(p))a.startsWith('on')?e.addEventListener(a.slice(2),v):e.setAttribute(a,v);e.append(...k.flat().filter(x=>x!=null&&x!==false));return e};
 const btn=(t,f)=>h('button',{onclick:async()=>{try{await f()}catch(x){alert(x.message)}}},t);
