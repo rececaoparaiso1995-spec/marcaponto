@@ -20,12 +20,16 @@ function cal(uid,adm){const box=h('div'),td=new Date().toLocaleDateString('sv-SE
  const go=n=>{const[y,mo]=m.split('-').map(Number),d=new Date(y,mo-1+n,1);m=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');box.load()};
  const just=ds=>{const i=h('input',{type:'file',accept:'image/*',onchange:async()=>{try{const f=i.files[0];if(!f)return;const fd=new FormData();fd.append('day',ds);fd.append('file',await shrink(f),'j.jpg');await api('justify',fd);box.load()}catch(x){alert(x.message)}}});i.click()};
  const photo=async id=>{const u=URL.createObjectURL(await api('justif/'+id,null,true));document.body.append(h('img',{class:'ph',src:u,onclick:e=>{e.target.remove();URL.revokeObjectURL(u)}}))};
+const edit=async(ds,p)=>{const cur=[];for(let i=0;i<p.length;i+=2)cur.push(hm(p[i].ts)+'-'+(p[i+1]?hm(p[i+1].ts):''));
+  const v=prompt(`Marcações de ${ds}: entrada-saída (ex: 09:00-13:00 14:00-18:00). Vazio apaga tudo.`,cur.join(' '));if(v===null)return;
+  const list=[];for(const pr of v.trim().split(/\s+/).filter(Boolean)){const[e,x]=pr.split('-');list.push({kind:'in',time:e});if(x)list.push({kind:'out',time:x})}
+  await api('punches/'+uid,{day:ds,p:list});box.load()};
  box.load=async()=>{try{const d=await api(`month/${uid}?m=${m}`),[y,mo]=m.split('-').map(Number),n=new Date(y,mo,0).getDate(),f=(new Date(y,mo-1,1).getDay()+6)%7;
   const g=h('div',{class:'g'},...'Seg Ter Qua Qui Sex Sáb Dom'.split(' ').map(x=>h('b',{},x)),...Array(f).fill(0).map(()=>h('i')));
   for(let i=1;i<=n;i++){const ds=`${m}-${String(i).padStart(2,'0')}`,s=d.s[ds],p=d.p.filter(x=>x.day===ds),j=d.j[ds],miss=s&&s.type==='T'&&ds<td&&!p.length;
    g.append(h('div',{class:'d '+(miss?(j?'J':'X'):s?s.type:'')+(ds===td?' now':'')},h('b',{},i),
     s&&h('small',{},s.type==='T'?(s.start||'')+'-'+(s.end||''):s.type==='F'?'Folga':'Férias'),
-    ...p.map(x=>h('small',{},(x.kind==='in'?'E ':'S ')+hm(x.ts))),
+    ...p.map(x=>h('small',{},(x.kind==='in'?'E ':'S ')+hm(x.ts))),adm&&btn('✎',()=>edit(ds,p)),
     miss&&(j?(adm?btn('Ver foto',()=>photo(j)):h('small',{},'Justificada')):(adm?h('small',{},'Falta'):btn('Justificar',()=>just(ds))))))}
   box.replaceChildren(h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},m),btn('▶',()=>go(1))),g)}catch(x){alert(x.message)}};
  box.load();return box}
@@ -38,8 +42,8 @@ function admin(){const list=h('div'),det=h('div'),link=t=>prompt('Envie este lin
  function sel(u){const f=h('input',{type:'file',accept:'.csv,.txt'}),a=h('input',{type:'date'}),z=h('input',{type:'date'});
   det.replaceChildren(h('h3',{},u.name),cal(u.id,true),
    h('p',{},h('b',{},'Horário (CSV: data,tipo,inicio,fim — tipo T/F/V): '),f,btn('Enviar',async()=>{if(!f.files[0]||f.files[0].size>2e5)throw Error('Ficheiro inválido');
-    const rows=(await f.files[0].text()).split(/\r?\n/).map(l=>l.split(/[;,]/).map(x=>x.trim())).filter(r=>/^\d{4}-\d{2}-\d{2}$/.test(r[0])).map(([day,type,start,end])=>({day,type:(type||'').toUpperCase(),start:start||null,end:end||null}));
-    for(let i=0;i<rows.length;i+=400)await api('schedule/'+u.id,{rows:rows.slice(i,i+400)});alert(rows.length+' dias gravados');sel(u)})),
+    const L=(await f.files[0].text()).replace(/^\uFEFF/,'').split(/\r?\n/).filter(l=>l.trim()),rows=L.map(l=>l.split(/[;,\t]/).map(x=>x.trim())).map(r=>{const m=r[0].match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);if(m)r[0]=`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;return r}).filter(r=>/^\d{4}-\d{2}-\d{2}$/.test(r[0])).map(([day,type,start,end])=>({day,type:(type||'').toUpperCase(),start:start||null,end:end||null}));
+    if(!rows.length)throw Error('Nenhuma linha válida no ficheiro');for(let i=0;i<rows.length;i+=400)await api('schedule/'+u.id,{rows:rows.slice(i,i+400)});alert(rows.length+' de '+L.length+' linhas gravadas');sel(u)})),
    h('p',{},h('b',{},'Férias: '),a,z,btn('Marcar',async()=>{const d=await api('vacation/'+u.id,{from:a.value,to:z.value});alert(d.n+' dias de férias');sel(u)})))}
  const nm=h('input',{placeholder:'Nome',maxlength:60}),un=h('input',{placeholder:'utilizador',maxlength:30});
  show(head(),h('h3',{},'Novo utilizador'),h('div',{},nm,un,btn('Criar',async()=>{const d=await api('users',{name:nm.value,username:un.value});nm.value=un.value='';link(d.token);ref()})),list,det);ref().catch(x=>alert(x.message))}
