@@ -10,7 +10,9 @@ async function api(p,body,raw){const fd=body instanceof FormData;
  if(r.status===401&&tok){out();throw Error('Sessão expirada')}
  if(raw&&r.ok)return r.blob();const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.e||'Erro');return d}
 function out(){sessionStorage.removeItem('t');tok=me=null;login()}
-const head=()=>h('div',{class:'top'},h('b',{},me.name),btn('Sair',async()=>{await api('logout',{}).catch(()=>{});out()}));
+const head=()=>h('div',{class:'top'},h('b',{},me.name),h('span',{},btn('Mudar password',()=>pw(me.role==='admin'?admin:user)),btn('Sair',async()=>{await api('logout',{}).catch(()=>{});out()})));
+function pw(back){const o=h('input',{type:'password',placeholder:'Password atual',autocomplete:'current-password',required:''}),n=h('input',{type:'password',placeholder:'Nova (mín. 10)',minlength:10,maxlength:200,required:'',autocomplete:'new-password'}),n2=h('input',{type:'password',placeholder:'Repetir nova',required:'',autocomplete:'new-password'});
+ show(head(),h('h3',{},'Mudar password'),h('form',{onsubmit:async e=>{e.preventDefault();if(n.value!==n2.value)return alert('Passwords diferentes');try{await api('password',{old:o.value,new:n.value});alert('Password alterada');back()}catch(x){alert(x.message)}}},o,n,n2,h('button',{},'Guardar')),btn('Voltar',back))}
 function login(){const u=h('input',{placeholder:'Utilizador',autocomplete:'username',required:'',maxlength:40}),p=h('input',{type:'password',placeholder:'Password',autocomplete:'current-password',required:'',maxlength:200});
  show(h('h2',{},'Marcar Ponto'),h('form',{onsubmit:async e=>{e.preventDefault();try{const d=await api('login',{username:u.value,password:p.value});tok=d.token;sessionStorage.setItem('t',tok);me=d.user;me.role==='admin'?admin():user()}catch(x){alert(x.message)}}},u,p,h('button',{},'Entrar')))}
 function activate(t){const p=h('input',{type:'password',placeholder:'Nova password (mín. 10)',minlength:10,maxlength:200,required:'',autocomplete:'new-password'}),p2=h('input',{type:'password',placeholder:'Repetir',required:'',autocomplete:'new-password'});
