@@ -39,7 +39,8 @@ function certs(uid,adm){const box=h('div'),t=h('input',{placeholder:'Título (ex
   let bl=file;if(file.type==='application/pdf'){if(file.size>5e5)throw Error('PDF até 500KB')}else bl=await shrink(file);
   const fd=new FormData();fd.append('title',t.value);fd.append('file',bl,file.type==='application/pdf'?'c.pdf':'c.jpg');await api('certs',fd);t.value='';f.value='';ld()}))]))};
  ld().catch(x=>alert(x.message));return box}
-function user(){const st=h('p'),b=h('button',{class:'big',onclick:async()=>{try{await api('punch',{kind:b.dataset.k});await t();c.load()}catch(x){alert(x.message)}}}),c=cal(me.id,false);
+const pos=()=>new Promise((ok,no)=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>ok(p.coords),()=>no(Error('Ative a localização no telemóvel/browser para marcar ponto')),{enableHighAccuracy:true,timeout:15000,maximumAge:0}):no(Error('Localização indisponível')));
+function user(){const st=h('p'),b=h('button',{class:'big',onclick:async()=>{try{const g=await pos();await api('punch',{kind:b.dataset.k,lat:g.latitude,lng:g.longitude,acc:g.accuracy});await t();c.load()}catch(x){alert(x.message)}}}),c=cal(me.id,false);
  async function t(){const d=await api('today'),l=d.p.at(-1),k=l&&l.kind==='in'?'out':'in';b.dataset.k=k;b.textContent=k==='in'?'Marcar ENTRADA':'Marcar SAÍDA';st.textContent=d.p.map(x=>(x.kind==='in'?'E ':'S ')+hm(x.ts)).join(' · ')||'Sem marcações hoje'}
  const vr=h('div'),a=h('input',{type:'date'}),z=h('input',{type:'date'});
  async function lv(){const d=await api('vr');vr.replaceChildren(...d.r.map(x=>h('div',{},`${x.d1} → ${x.d2}: ${{pend:'pendente',ok:'aprovado',no:'recusado',can:'cancelado'}[x.st]} `,x.st==='pend'&&btn('Cancelar',async()=>{await api(`vr/${x.id}/cancel`,{});lv()}))))}
