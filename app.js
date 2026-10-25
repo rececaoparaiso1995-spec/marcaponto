@@ -33,17 +33,23 @@ const edit=async(ds,p)=>{const cur=[];for(let i=0;i<p.length;i+=2)cur.push(hm(p[
     miss&&(j?(adm?btn('Ver foto',()=>photo(j)):h('small',{},'Justificada')):(adm?h('small',{},'Falta'):btn('Justificar',()=>just(ds))))))}
   box.replaceChildren(h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},m),btn('▶',()=>go(1))),g)}catch(x){alert(x.message)}};
  box.load();return box}
+function certs(uid,adm){const box=h('div'),t=h('input',{placeholder:'Título (ex: Formação HACCP)',maxlength:80}),f=h('input',{type:'file',accept:'image/*,application/pdf'});
+ const open=async x=>{const u=URL.createObjectURL(await api('cert/'+x.id,null,true));if(x.mime==='application/pdf'){const a=h('a',{href:u,download:'certificado.pdf'});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),9e3)}else document.body.append(h('img',{class:'ph',src:u,onclick:e=>{e.target.remove();URL.revokeObjectURL(u)}}))};
+ const ld=async()=>{const d=await api('certs/'+uid);box.replaceChildren(h('h3',{},'Certificados de formação'),...d.r.map(x=>h('div',{},new Date(x.ts).toLocaleDateString('pt-PT')+' · '+x.title+' ',btn('Abrir',()=>open(x)),btn('Apagar',async()=>{if(confirm('Apagar?')){await api(`cert/${x.id}/del`,{});ld()}}))),...(adm?[]:[h('p',{},t,f,btn('Enviar',async()=>{const file=f.files[0];if(!file||!t.value.trim())throw Error('Indique título e ficheiro');
+  let bl=file;if(file.type==='application/pdf'){if(file.size>5e5)throw Error('PDF até 500KB')}else bl=await shrink(file);
+  const fd=new FormData();fd.append('title',t.value);fd.append('file',bl,file.type==='application/pdf'?'c.pdf':'c.jpg');await api('certs',fd);t.value='';f.value='';ld()}))]))};
+ ld().catch(x=>alert(x.message));return box}
 function user(){const st=h('p'),b=h('button',{class:'big',onclick:async()=>{try{await api('punch',{kind:b.dataset.k});await t();c.load()}catch(x){alert(x.message)}}}),c=cal(me.id,false);
  async function t(){const d=await api('today'),l=d.p.at(-1),k=l&&l.kind==='in'?'out':'in';b.dataset.k=k;b.textContent=k==='in'?'Marcar ENTRADA':'Marcar SAÍDA';st.textContent=d.p.map(x=>(x.kind==='in'?'E ':'S ')+hm(x.ts)).join(' · ')||'Sem marcações hoje'}
  const vr=h('div'),a=h('input',{type:'date'}),z=h('input',{type:'date'});
  async function lv(){const d=await api('vr');vr.replaceChildren(...d.r.map(x=>h('div',{},`${x.d1} → ${x.d2}: ${{pend:'pendente',ok:'aprovado',no:'recusado',can:'cancelado'}[x.st]} `,x.st==='pend'&&btn('Cancelar',async()=>{await api(`vr/${x.id}/cancel`,{});lv()}))))}
- show(head(),h('p',{},b),st,c,h('h3',{},'Pedir férias'),h('p',{},a,z,btn('Pedir',async()=>{await api('vr',{from:a.value,to:z.value});lv()})),vr);t().catch(()=>{});lv().catch(()=>{})}
+ show(head(),h('p',{},b),st,c,h('h3',{},'Pedir férias'),h('p',{},a,z,btn('Pedir',async()=>{await api('vr',{from:a.value,to:z.value});lv()})),vr,certs(me.id,false));t().catch(()=>{});lv().catch(()=>{})}
 function admin(){const list=h('div'),det=h('div'),link=t=>prompt('Envie este link ao utilizador (válido 48h):',location.origin+location.pathname+'#invite='+t);
 const pr=h('div');async function lp(){const d=await api('vr/all');pr.replaceChildren(h('h3',{},`Pedidos de férias (${d.r.length})`),...d.r.map(x=>h('div',{},`${x.name}: ${x.d1} → ${x.d2} `,btn('Aprovar',async()=>{await api(`vr/${x.id}/decide`,{ok:1});lp()}),btn('Recusar',async()=>{await api(`vr/${x.id}/decide`,{ok:0});lp()}))))}
  async function ref(){const d=await api('users');list.replaceChildren(h('table',{},...d.users.map(u=>h('tr',{},h('td',{},`${u.name} (${u.username})`+(u.role==='admin'?' ★':'')+(u.pending?' [pendente]':'')+(u.active?'':' [inativo]')),
   h('td',{},btn('Ver',()=>sel(u)),u.role==='user'&&btn('Convite/Repor',async()=>link((await api(`users/${u.id}/invite`,{})).token)),u.role==='user'&&btn(u.active?'Desativar':'Ativar',async()=>{await api(`users/${u.id}/active`,{active:u.active?0:1});ref()}))))))}
  function sel(u){const f=h('input',{type:'file',accept:'.csv,.txt'}),a=h('input',{type:'date'}),z=h('input',{type:'date'});
-  det.replaceChildren(h('h3',{},u.name),cal(u.id,true),
+  det.replaceChildren(h('h3',{},u.name),cal(u.id,true),certs(u.id,true),
    h('p',{},h('b',{},'Horário (CSV: data,tipo,inicio,fim — tipo T/F/V): '),f,btn('Enviar',async()=>{if(!f.files[0]||f.files[0].size>2e5)throw Error('Ficheiro inválido');
     const L=(await f.files[0].text()).replace(/^\uFEFF/,'').split(/\r?\n/).filter(l=>l.trim()),rows=L.map(l=>l.split(/[;,\t]/).map(x=>x.trim())).map(r=>{const m=r[0].match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);if(m)r[0]=`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;return r}).filter(r=>/^\d{4}-\d{2}-\d{2}$/.test(r[0])).map(([day,type,start,end])=>({day,type:(type||'').toUpperCase(),start:start||null,end:end||null}));
     if(!rows.length)throw Error('Nenhuma linha válida no ficheiro');for(let i=0;i<rows.length;i+=400)await api('schedule/'+u.id,{rows:rows.slice(i,i+400)});alert(rows.length+' de '+L.length+' linhas gravadas');sel(u)})),
@@ -52,4 +58,3 @@ const pr=h('div');async function lp(){const d=await api('vr/all');pr.replaceChil
  show(head(),pr,h('h3',{},'Novo utilizador'),h('div',{},nm,un,btn('Criar',async()=>{const d=await api('users',{name:nm.value,username:un.value});nm.value=un.value='';link(d.token);ref()})),list,det);ref().catch(x=>alert(x.message));lp().catch(()=>{})}
 (async()=>{const m=location.hash.match(/^#invite=([\w-]{20,})$/);if(m){history.replaceState(null,'',location.pathname);return activate(m[1])}
  if(tok)try{me=await api('me');return me.role==='admin'?admin():user()}catch{}login()})();
-
