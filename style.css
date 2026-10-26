@@ -4,3 +4,5 @@ button{cursor:pointer}.top{display:flex;justify-content:space-between;align-item
 .g>b{text-align:center;font-size:.8em}.d{min-height:62px;border:1px solid #ccc;border-radius:4px;padding:2px;font-size:.75em;overflow:hidden}.d small{display:block}
 .T{background:#d8f3dc}.F{background:#e5e5e5}.V{background:#cfe3ff}.X{background:#ffd0d0}.J{background:#fff0b8}.w{min-width:780px}.dd{min-height:90px;cursor:pointer}.now{outline:2px solid #333}
 .ph{position:fixed;inset:0;margin:auto;max-width:95vw;max-height:95vh;background:#000;border:4px solid #fff;z-index:9}.sc{overflow-x:auto}
+body.wide{max-width:1200px}.adm{display:grid;grid-template-columns:210px 1fr;gap:16px;align-items:start}.side{display:flex;flex-direction:column;gap:4px;position:sticky;top:8px}.side button{text-align:left}.side .on{background:#222;color:#fff}.card{border:1px solid #ccc;border-radius:8px;padding:8px;margin:8px 0}.main{min-width:0}
+@media(max-width:760px){.adm{grid-template-columns:1fr}.side{flex-direction:row;overflow-x:auto;position:static}}
