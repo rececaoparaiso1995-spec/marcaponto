@@ -1,4 +1,5 @@
 const API='https://ponto-api.rececaoparaiso1995.workers.dev';
+if(window.top!==window.self){document.documentElement.remove();throw 0}
 const $=document.getElementById('app');
 const h=(t,p={},...k)=>{const e=document.createElement(t);for(const[a,v]of Object.entries(p))a.startsWith('on')?e.addEventListener(a.slice(2),v):e.setAttribute(a,v);e.append(...k.flat().filter(x=>x!=null&&x!==false));return e};
 const btn=(t,f)=>h('button',{onclick:async()=>{try{await f()}catch(x){alert(x.message)}}},t);
@@ -46,7 +47,7 @@ function dcal(id,name){const box=h('div'),ed=h('div'),td=new Date().toLocaleDate
   const bad=[];for(let i=1;i<=n;i++){const ds=`${m}-${String(i).padStart(2,'0')}`,L=by[ds]||[],k=new Set(L.filter(x=>x.type==='T').map(x=>(x.start||'')+'-'+(x.end||''))).size,w=!!(L.length&&k<2);if(w)bad.push(i);
    g.append(h('div',{class:'d dd'+(w?' X':'')+(ds===td?' now':''),onclick:()=>edit(ds)},h('b',{},i),w&&h('small',{},k?'⚠ Só 1 turno':'⚠ Sem turnos'),...L.filter(x=>x.type==='T').map(x=>h('small',{class:'T'},`${x.name} ${x.start||''}-${x.end||''}`)),...L.filter(x=>x.type==='V').map(x=>h('small',{class:'V'},`Férias: ${x.name}`))))}
   ed.replaceChildren();
-  box.replaceChildren(h('h3',{},name),h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},m),btn('▶',()=>go(1))),...(bad.length?[h('p',{class:'X'},`⚠ ${bad.length} dia(s) com cobertura insuficiente (menos de 2 turnos): ${bad.join(', ')}`)]:[]),h('div',{style:'overflow-x:auto'},g),h('small',{},'Clique num dia para atribuir turnos. Quem não for atribuído fica de folga; as férias não são alteradas.'),ed,
+  box.replaceChildren(h('h3',{},name),h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},m),btn('▶',()=>go(1))),...(bad.length?[h('p',{class:'X'},`⚠ ${bad.length} dia(s) com cobertura insuficiente (menos de 2 turnos): ${bad.join(', ')}`)]:[]),h('div',{class:'sc'},g),h('small',{},'Clique num dia para atribuir turnos. Quem não for atribuído fica de folga; as férias não são alteradas.'),ed,
    h('div',{},h('b',{},'Turnos: '),...D.sh.map(x=>h('span',{},`${x.name} ${x.start}-${x.end} `,btn('✕',async()=>{await api(`shifts/${x.id}/del`,{});box.load()}),' ')),h('p',{},sn,s1,s2,btn('Adicionar turno',async()=>{await api('shifts',{dept:id,name:sn.value,start:s1.value,end:s2.value});sn.value=s1.value=s2.value='';box.load()}))))}catch(x){alert(x.message)}};
  box.load();return box}
 function certs(uid,adm){const box=h('div'),t=h('input',{placeholder:'Título (ex: Formação HACCP)',maxlength:80}),f=h('input',{type:'file',accept:'image/*,application/pdf'});
