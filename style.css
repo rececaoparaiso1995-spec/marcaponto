@@ -6,3 +6,4 @@ button{cursor:pointer}.top{display:flex;justify-content:space-between;align-item
 .ph{position:fixed;inset:0;margin:auto;max-width:95vw;max-height:95vh;background:#000;border:4px solid #fff;z-index:9}.sc{overflow-x:auto}
 body.wide{max-width:1200px}.adm{display:grid;grid-template-columns:210px 1fr;gap:16px;align-items:start}.side{display:flex;flex-direction:column;gap:4px;position:sticky;top:8px}.side button{text-align:left}.side .on{background:#222;color:#fff}.card{border:1px solid #ccc;border-radius:8px;padding:8px;margin:8px 0}.main{min-width:0}
 @media(max-width:760px){.adm{grid-template-columns:1fr}.side{flex-direction:row;overflow-x:auto;position:static}}
+.tabs{display:flex;gap:4px;margin:8px 0}.tabs .on{background:#222;color:#fff}.pre{white-space:pre-wrap;margin:4px 0}.L{background:#ffe8cc}.compose{display:grid;gap:6px;max-width:520px}.compose textarea{font:inherit;padding:8px}.chk{display:block}
