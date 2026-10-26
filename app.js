@@ -20,6 +20,15 @@ function login(){document.body.className='';const u=h('input',{placeholder:'Util
  show(h('h2',{},'Marcar Ponto'),h('form',{onsubmit:async e=>{e.preventDefault();try{const d=await api('login',{username:u.value,password:p.value});tok=d.token;sessionStorage.setItem('t',tok);me=d.user;sessionStorage.setItem('u',JSON.stringify(me));start()}catch(x){alert(x.message)}}},u,p,h('button',{},'Entrar')))}
 function activate(t){const p=h('input',{type:'password',placeholder:'Nova password (mín. 10)',minlength:10,maxlength:200,required:'',autocomplete:'new-password'}),p2=h('input',{type:'password',placeholder:'Repetir',required:'',autocomplete:'new-password'});
  show(h('h2',{},'Definir password'),h('form',{onsubmit:async e=>{e.preventDefault();if(p.value!==p2.value)return alert('Passwords diferentes');try{await api('activate',{token:t,password:p.value});alert('Password definida. Faça login.');login()}catch(x){alert(x.message)}}},p,p2,h('button',{},'Guardar')))}
+const WD='Seg Ter Qua Qui Sex Sáb Dom'.split(' '),mins=x=>{const[a,b]=x.split(':');return a*60+ +b},dt=t=>new Date(t).toLocaleString('pt-PT',{timeZone:'Europe/Lisbon'}),safe=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\w.-]+/g,'_').slice(0,60);
+const saveAs=(b,n)=>{const u=URL.createObjectURL(b),a=h('a',{href:u,download:n});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),9e3)};
+const viewBlob=async p=>{const u=URL.createObjectURL(await p);document.body.append(h('img',{class:'ph',src:u,onclick:e=>{e.target.remove();URL.revokeObjectURL(u)}}))};
+const crc=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return b=>{let c=-1;for(const x of b)c=t[(c^x)&255]^(c>>>8);return(c^-1)>>>0}})();
+async function zip(files){const E=new TextEncoder(),parts=[],cen=[];let off=0;for(const f of files){const n=E.encode(f.name),d=new Uint8Array(await f.blob.arrayBuffer()),c=crc(d),l=new DataView(new ArrayBuffer(30)),k=new DataView(new ArrayBuffer(46));
+ l.setUint32(0,0x04034b50,true);l.setUint16(4,20,true);l.setUint16(6,0x0800,true);l.setUint32(14,c,true);l.setUint32(18,d.length,true);l.setUint32(22,d.length,true);l.setUint16(26,n.length,true);parts.push(l,n,d);
+ k.setUint32(0,0x02014b50,true);k.setUint16(4,20,true);k.setUint16(6,20,true);k.setUint16(8,0x0800,true);k.setUint32(16,c,true);k.setUint32(20,d.length,true);k.setUint32(24,d.length,true);k.setUint16(28,n.length,true);k.setUint32(42,off,true);cen.push(k,n);off+=30+n.length+d.length}
+ const e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cen.reduce((s,x)=>s+x.byteLength,0),true);e.setUint32(16,off,true);return new Blob([...parts,...cen,e],{type:'application/zip'})}
+const ics=L=>{const z=new Date().toISOString().replace(/[-:]|\.\d+/g,''),e=s=>String(s||'').replace(/[\\;,]/g,c=>'\\'+c),d=(a,t)=>a.replace(/-/g,'')+(t?'T'+t.replace(':','')+'00':'');return 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Ponto//PT\r\n'+L.map(x=>`BEGIN:VEVENT\r\nUID:t${x.id}@ponto\r\nDTSTAMP:${z}\r\n`+(x.start?`DTSTART:${d(x.day,x.start)}\r\nDTEND:${d(x.day,x.end||x.start)}\r\n`:`DTSTART;VALUE=DATE:${d(x.day)}\r\n`)+`SUMMARY:${e(x.title)}\r\n`+(x.place?`LOCATION:${e(x.place)}\r\n`:'')+'END:VEVENT\r\n').join('')+'END:VCALENDAR\r\n'};
 async function shrink(f){const b=await createImageBitmap(f),s=Math.min(1,1280/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=b.width*s;c.height=b.height*s;c.getContext('2d').drawImage(b,0,0,c.width,c.height);return new Promise(r=>c.toBlob(r,'image/jpeg',.6))}
 function cal(uid,adm){const box=h('div'),td=new Date().toLocaleDateString('sv-SE');let m=td.slice(0,7);
  const go=n=>{const[y,mo]=m.split('-').map(Number),d=new Date(y,mo-1+n,1);m=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');box.load()};
@@ -31,11 +40,11 @@ const edit=async(ds,p)=>{const cur=[];for(let i=0;i<p.length;i+=2)cur.push(hm(p[
   await api('punches/'+uid,{day:ds,p:list});box.load()};
  box.load=async()=>{try{const d=await api(`month/${uid}?m=${m}`),[y,mo]=m.split('-').map(Number),n=new Date(y,mo,0).getDate(),f=(new Date(y,mo-1,1).getDay()+6)%7;
   const g=h('div',{class:'g'},...'Seg Ter Qua Qui Sex Sáb Dom'.split(' ').map(x=>h('b',{},x)),...Array(f).fill(0).map(()=>h('i')));
-  for(let i=1;i<=n;i++){const ds=`${m}-${String(i).padStart(2,'0')}`,s=d.s[ds],p=d.p.filter(x=>x.day===ds),j=d.j[ds],miss=s&&s.type==='T'&&ds<td&&!p.length;
-   g.append(h('div',{class:'d '+(miss?(j?'J':'X'):s?s.type:'')+(ds===td?' now':'')},h('b',{},i),
+  for(let i=1;i<=n;i++){const ds=`${m}-${String(i).padStart(2,'0')}`,s=d.s[ds],p=d.p.filter(x=>x.day===ds),j=d.j[ds],miss=s&&s.type==='T'&&ds<td&&!p.length,late=!!(s&&s.type==='T'&&s.start&&p[0]&&p[0].kind==='in'&&mins(hm(p[0].ts))-mins(s.start)>5);
+   g.append(h('div',{class:'d '+(miss?(j?'J':'X'):late?(j?'J':'L'):s?s.type:'')+(ds===td?' now':'')},h('b',{},i),
     s&&h('small',{},s.type==='T'?(s.start||'')+'-'+(s.end||''):s.type==='F'?'Folga':'Férias'),
     ...p.map(x=>h('small',{},(x.kind==='in'?'E ':'S ')+hm(x.ts))),adm&&btn('✎',()=>edit(ds,p)),
-    miss&&(j?(adm?btn('Ver foto',()=>photo(j)):h('small',{},'Justificada')):(adm?h('small',{},'Falta'):btn('Justificar',()=>just(ds))))))}
+    miss&&(j?(adm?btn('Ver foto',()=>photo(j)):h('small',{},'Justificada')):(adm?h('small',{},'Falta'):btn('Justificar',()=>just(ds)))),late&&(j?(adm?btn('Ver foto (atraso)',()=>photo(j)):h('small',{},'Atraso justificado')):(adm?h('small',{},'⚠ Atraso'):btn('Justificar atraso',()=>just(ds))))))}
   box.replaceChildren(h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},m),btn('▶',()=>go(1))),g)}catch(x){alert(x.message)}};
  box.load();return box}
 function dcal(id,name){const box=h('div'),ed=h('div'),td=new Date().toLocaleDateString('sv-SE'),sn=h('input',{placeholder:'Turno (ex: Manhã)',maxlength:30}),s1=h('input',{type:'time'}),s2=h('input',{type:'time'});let m=td.slice(0,7),D={r:[],sh:[],us:[]};
@@ -59,16 +68,20 @@ function certs(uid,adm){const box=h('div'),t=h('input',{placeholder:'Título (ex
   const fd=new FormData();fd.append('title',t.value);fd.append('file',bl,file.type==='application/pdf'?'c.pdf':'c.jpg');await api('certs',fd);t.value='';f.value='';ld()}))]))};
  ld().catch(x=>alert(x.message));return box}
 const pos=()=>new Promise((ok,no)=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>ok(p.coords),()=>no(Error('Ative a localização no telemóvel/browser para marcar ponto')),{enableHighAccuracy:true,timeout:15000,maximumAge:0}):no(Error('Localização indisponível')));
-function user(){document.body.className='';const st=h('p'),b=h('button',{class:'big',onclick:async()=>{try{const g=await pos();await api('punch',{kind:b.dataset.k,lat:g.latitude,lng:g.longitude,acc:g.accuracy});await t();c.load()}catch(x){alert(x.message)}}}),c=cal(me.id,false);
+let UP='ponto';
+const utabs=()=>{const b=h('b',{});api('unread').then(d=>{b.textContent=d.c?` (${d.c})`:''}).catch(()=>{});return h('div',{class:'tabs'},...[['ponto','Ponto'],['form','Formações'],['rec','Recados']].map(([k,t])=>h('button',{class:k===UP?'on':'',onclick:()=>{UP=k;user()}},t,k==='rec'?b:null)))};
+function upage(){const m=h('div');show(head(),utabs(),m);(UP==='form'?pForm(m,false):pRec(m)).catch(x=>alert(x.message))}
+async function pRec(m){const d=await api('msgs');m.append(h('h2',{},'Recados da direção'),...(d.r.length?d.r.map(x=>h('div',{class:'card'+(x.seen?'':' J')},h('b',{},x.title),h('small',{},' '+dt(x.ts)),h('p',{class:'pre'},x.body))):[h('p',{},'Sem recados.')]));if(d.r.some(x=>!x.seen))api('msgs/readall',{}).catch(()=>{})}
+function user(){document.body.className='';if(UP!=='ponto')return upage();const st=h('p'),b=h('button',{class:'big',onclick:async()=>{try{const g=await pos();await api('punch',{kind:b.dataset.k,lat:g.latitude,lng:g.longitude,acc:g.accuracy});await t();c.load()}catch(x){alert(x.message)}}}),c=cal(me.id,false);
  async function t(){const d=await api('today'),l=d.p.at(-1),k=l&&l.kind==='in'?'out':'in';b.dataset.k=k;b.textContent=k==='in'?'Marcar ENTRADA':'Marcar SAÍDA';st.textContent=d.p.map(x=>(x.kind==='in'?'E ':'S ')+hm(x.ts)).join(' · ')||'Sem marcações hoje'}
  const vr=h('div'),a=h('input',{type:'date'}),z=h('input',{type:'date'});
  async function lv(){const d=await api('vr');vr.replaceChildren(...d.r.map(x=>h('div',{},`${x.d1} → ${x.d2}: ${{pend:'pendente',ok:'aprovado',no:'recusado',can:'cancelado'}[x.st]} `,x.st==='pend'&&btn('Cancelar',async()=>{await api(`vr/${x.id}/cancel`,{});lv()}))))}
- show(head(),h('p',{},b),st,c,h('h3',{},'Pedir férias'),h('p',{},a,z,btn('Pedir',async()=>{await api('vr',{from:a.value,to:z.value});lv()})),vr,certs(me.id,false));t().catch(()=>{});lv().catch(()=>{})}
+ show(head(),utabs(),h('p',{},b),st,c,h('h3',{},'Pedir férias'),h('p',{},a,z,btn('Pedir',async()=>{await api('vr',{from:a.value,to:z.value});lv()})),vr,certs(me.id,false));t().catch(()=>{});lv().catch(()=>{})}
 const link=t=>prompt('Envie este link ao utilizador (válido 48h):',location.origin+location.pathname+'#invite='+t);
 let AP='inicio',TM=0;
-function admin(){clearInterval(TM);document.body.className='wide';const main=h('div',{class:'main'}),bd=h('b',{}),items=[['inicio','Início'],['users','Utilizadores'],['depts','Departamentos'],['ferias','Pedidos de férias']];
+function admin(){clearInterval(TM);document.body.className='wide';const main=h('div',{class:'main'}),bd=h('b',{}),items=[['inicio','Início'],['users','Utilizadores'],['depts','Departamentos'],['ferias','Pedidos de férias'],['just','Justificações'],['certs','Certificados'],['form','Formações'],['rec','Recados']];
  show(head(),h('div',{class:'adm'},h('nav',{class:'side'},...items.map(([k,t])=>h('button',{class:k===AP?'on':'',onclick:()=>{AP=k;admin()}},t,k==='ferias'?bd:null))),main));
- ({inicio:pInicio,users:pUsers,depts:pDepts,ferias:pFerias})[AP](main).catch(x=>alert(x.message));
+ ({inicio:pInicio,users:pUsers,depts:pDepts,ferias:pFerias,just:pJust,certs:pCerts,form:m=>pForm(m,true),rec:pRecados})[AP](main).catch(x=>alert(x.message));
  api('vr/all').then(d=>{bd.textContent=d.r.length?` (${d.r.length})`:''}).catch(()=>{});
  if(AP==='inicio')TM=setInterval(()=>{if(!document.hidden)admin()},60000)}
 async function pInicio(m){const d=await api('onduty');
@@ -92,6 +105,28 @@ async function pDepts(m){const[d,e]=await Promise.all([api('users'),api('depts')
  const ref=async()=>{const[a,b]=await Promise.all([api('users'),api('depts')]);draw(b.r,a.users)};
  draw(e.r,d.users);m.append(h('h2',{},'Departamentos'),h('div',{},dn,btn('Criar departamento',async()=>{await api('depts',{name:dn.value});dn.value='';ref()})),list,det)}
 async function pFerias(m){const box=h('div'),lp=async()=>{const d=await api('vr/all');box.replaceChildren(h('h2',{},`Pedidos de férias (${d.r.length})`),...d.r.map(x=>h('div',{class:'card'},`${x.name}: ${x.d1} → ${x.d2} `,btn('Aprovar',async()=>{await api(`vr/${x.id}/decide`,{ok:1});lp()}),btn('Recusar',async()=>{await api(`vr/${x.id}/decide`,{ok:0});lp()}))))};await lp();m.append(box)}
+async function pJust(m){const mi=h('input',{type:'month',value:new Date().toLocaleDateString('sv-SE').slice(0,7)}),box=h('div');let L=[];
+ const nm=x=>`${x.day}_${x.id}_${safe(x.name)}_${x.tp==='A'?'atraso':'falta'}.jpg`,fx=x=>api('justif/'+x.id,null,true);
+ const load=async()=>{L=(await api('justlist?m='+mi.value)).r;box.replaceChildren(h('p',{},`${L.length} justificação(ões)`),...L.map(x=>h('div',{class:'card'},`${x.day} · ${x.name} · ${x.tp==='A'?'Atraso':'Falta'} `,btn('Ver',()=>viewBlob(fx(x))),btn('Descarregar',async()=>saveAs(await fx(x),nm(x))))))};
+ m.append(h('h2',{},'Justificações de faltas e atrasos'),h('p',{},mi,btn('Mostrar',load),btn('Descarregar todas (ZIP)',async()=>{if(!L.length)throw Error('Nada para descarregar');const f=[];for(const x of L.slice(0,100))f.push({name:nm(x),blob:await fx(x)});saveAs(await zip(f),`justificacoes_${mi.value}.zip`)})),box);await load()}
+async function pCerts(m){const d=await api('allcerts'),fi=h('input',{placeholder:'Filtrar por nome ou título'}),box=h('div');let L=d.r;
+ const nm=x=>`${x.id}_${safe(x.name)}_${safe(x.title)}.${x.mime==='application/pdf'?'pdf':'jpg'}`,fx=x=>api('cert/'+x.id,null,true);
+ const draw=()=>{const t=fi.value.toLowerCase();L=d.r.filter(x=>(x.name+' '+x.title).toLowerCase().includes(t));box.replaceChildren(h('p',{},`${L.length} certificado(s)`),...L.map(x=>h('div',{class:'card'},`${new Date(x.ts).toLocaleDateString('pt-PT')} · ${x.name} · ${x.title} `,btn('Ver',async()=>{const b=await fx(x);x.mime==='application/pdf'?saveAs(b,nm(x)):viewBlob(Promise.resolve(b))}),btn('Descarregar',async()=>saveAs(await fx(x),nm(x))))))};
+ fi.addEventListener('input',draw);m.append(h('h2',{},'Certificados de formação'),h('p',{},fi,btn('Descarregar todos (ZIP)',async()=>{if(!L.length)throw Error('Nada para descarregar');const f=[];for(const x of L.slice(0,100))f.push({name:nm(x),blob:await fx(x)});saveAs(await zip(f),'certificados.zip')})),box);draw()}
+async function pForm(m,adm){const td=new Date().toLocaleDateString('sv-SE');let mo=td.slice(0,7),D=[];const box=h('div'),ed=h('div'),ds=adm?(await api('depts')).r:[],
+ go=n=>{const[y,k]=mo.split('-').map(Number),d=new Date(y,k-1+n,1);mo=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');load()},
+ when=x=>x.start?x.start+(x.end?'-'+x.end:'')+' ':'',
+ add=day=>{const t=h('input',{placeholder:'Título',maxlength:80}),pl=h('input',{placeholder:'Local',maxlength:60}),a=h('input',{type:'time'}),z=h('input',{type:'time'}),s=h('select',{},h('option',{value:''},'Toda a staff'),...ds.map(x=>h('option',{value:x.id},x.name)));
+  ed.replaceChildren(h('h4',{},`Formações de ${day}`),...D.filter(x=>x.day===day).map(x=>h('div',{},`${when(x)}${x.title}${x.place?' @ '+x.place:''} `,btn('Apagar',async()=>{if(confirm('Apagar formação?')){await api(`trainings/${x.id}/del`,{});load()}}))),h('p',{},t,pl,a,z,s,btn('Adicionar',async()=>{await api('trainings',{day,title:t.value,place:pl.value,start:a.value||null,end:z.value||null,dept:s.value||null});load()})),btn('Fechar',()=>ed.replaceChildren()))},
+ load=async()=>{D=(await api(`trainings?m=${mo}`)).r;const[y,k]=mo.split('-').map(Number),n=new Date(y,k,0).getDate(),f=(new Date(y,k-1,1).getDay()+6)%7,g=h('div',{class:'g'},...WD.map(x=>h('b',{},x)),...Array(f).fill(0).map(()=>h('i')));
+  for(let i=1;i<=n;i++){const day=`${mo}-${String(i).padStart(2,'0')}`;g.append(h('div',{class:'d'+(adm?' dd':'')+(day===td?' now':''),onclick:()=>{if(adm)add(day)}},h('b',{},i),...D.filter(x=>x.day===day).map(x=>h('small',{class:'V'},when(x)+x.title))))}
+  ed.replaceChildren();box.replaceChildren(h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},mo),btn('▶',()=>go(1))),g,btn('Descarregar calendário (.ics)',()=>saveAs(new Blob([ics(D)],{type:'text/calendar'}),`formacoes_${mo}.ics`)),...D.map(x=>h('div',{},`${x.day} ${when(x)}${x.title}${x.place?' @ '+x.place:''}`)),adm?h('small',{},'Clique num dia para adicionar ou apagar formações.'):null,ed)};
+ m.append(h('h2',{},'Formações'),box);await load()}
+async function pRecados(m){const[u,dp]=await Promise.all([api('users'),api('depts')]),t=h('input',{placeholder:'Assunto',maxlength:80}),b=h('textarea',{placeholder:'Mensagem (máx. 1000 caracteres)',maxlength:1000,rows:4}),to=h('select',{},h('option',{value:'all'},'Toda a staff'),h('option',{value:'dept'},'Departamentos…'),h('option',{value:'users'},'Utilizadores específicos…')),pick=h('div'),hist=h('div');
+ const chk=(l,v)=>h('label',{class:'chk'},h('input',{type:'checkbox',value:v}),' '+l);
+ to.addEventListener('change',()=>pick.replaceChildren(...(to.value==='dept'?dp.r.map(x=>chk(x.name,x.id)):to.value==='users'?u.users.filter(x=>x.role==='user'&&x.active).map(x=>chk(x.name,x.id)):[])));
+ const lh=async()=>{const d=await api('msgsent');hist.replaceChildren(h('h3',{},'Enviados'),...d.r.map(x=>h('div',{class:'card'},h('b',{},x.title),h('small',{},` ${dt(x.ts)} · lido por ${x.r}/${x.n} `),btn('Apagar',async()=>{if(confirm('Apagar recado?')){await api(`msgs/${x.id}/del`,{});lh()}}),h('p',{class:'pre'},x.body))))};
+ m.append(h('h2',{},'Recados da direção'),h('div',{class:'compose'},t,b,to,pick,btn('Enviar',async()=>{const ids=[...pick.querySelectorAll('input:checked')].map(i=>Number(i.value)),d=await api('msgs',{title:t.value,body:b.value,to:to.value,ids});alert(`Enviado a ${d.n} pessoa(s)`);t.value=b.value='';lh()})),hist);await lh()}
 async function start(){const k='h:'+me.id,snap=sessionStorage.getItem(k),go=()=>{me.role==='admin'?admin():user();PRE={}};
  if(snap){try{PRE=JSON.parse(snap)}catch{PRE={}}go()}
  try{const f=await api(me.role==='admin'?'adminhome':'home?m='+new Date().toLocaleDateString('sv-SE').slice(0,7)),j=JSON.stringify(f);
