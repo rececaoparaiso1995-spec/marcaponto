@@ -5,17 +5,19 @@ const h=(t,p={},...k)=>{const e=document.createElement(t);for(const[a,v]of Objec
 const btn=(t,f)=>h('button',{onclick:async()=>{try{await f()}catch(x){alert(x.message)}}},t);
 const show=(...k)=>$.replaceChildren(...k);
 const hm=t=>new Date(t).toLocaleTimeString('pt-PT',{timeZone:'Europe/Lisbon',hour:'2-digit',minute:'2-digit'});
-let tok=sessionStorage.getItem('t'),me=null;
-async function api(p,body,raw){const fd=body instanceof FormData;
- const r=await fetch(`${API}/api/${p}`,{method:body?'POST':'GET',headers:{...(tok&&{Authorization:'Bearer '+tok}),...(body&&!fd&&{'Content-Type':'application/json'})},body:body?(fd?body:JSON.stringify(body)):undefined});
+let tok=sessionStorage.getItem('t'),me=null,PRE={};const PERF=location.hash==='#perf';
+async function api(p,body,raw){if(!body&&!raw&&p in PRE){const v=PRE[p];delete PRE[p];return v}
+ const fd=body instanceof FormData;
+ const t0=performance.now(),r=await fetch(`${API}/api/${p}`,{method:body?'POST':'GET',headers:{...(tok&&{Authorization:'Bearer '+tok}),...(body&&!fd&&{'Content-Type':'application/json'})},body:body?(fd?body:JSON.stringify(body)):undefined});
+ if(PERF)console.log(p,Math.round(performance.now()-t0)+' ms',r.headers.get('Server-Timing'));
  if(r.status===401&&tok){out();throw Error('Sessão expirada')}
  if(raw&&r.ok)return r.blob();const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.e||'Erro');return d}
-function out(){sessionStorage.removeItem('t');sessionStorage.removeItem('u');tok=me=null;login()}
-const head=()=>h('div',{class:'top'},h('b',{},me.name),h('span',{},btn('Mudar password',()=>pw(me.role==='admin'?admin:user)),btn('Sair',async()=>{await api('logout',{}).catch(()=>{});out()})));
+function out(){sessionStorage.clear();tok=me=null;login()}
+const head=()=>h('div',{class:'top'},h('b',{},me.name),h('span',{},btn('Mudar password',()=>pw(start)),btn('Sair',async()=>{await api('logout',{}).catch(()=>{});out()})));
 function pw(back){const o=h('input',{type:'password',placeholder:'Password atual',autocomplete:'current-password',required:''}),n=h('input',{type:'password',placeholder:'Nova (mín. 10)',minlength:10,maxlength:200,required:'',autocomplete:'new-password'}),n2=h('input',{type:'password',placeholder:'Repetir nova',required:'',autocomplete:'new-password'});
  show(head(),h('h3',{},'Mudar password'),h('form',{onsubmit:async e=>{e.preventDefault();if(n.value!==n2.value)return alert('Passwords diferentes');try{await api('password',{old:o.value,new:n.value});alert('Password alterada');back()}catch(x){alert(x.message)}}},o,n,n2,h('button',{},'Guardar')),btn('Voltar',back))}
 function login(){const u=h('input',{placeholder:'Utilizador',autocomplete:'username',required:'',maxlength:40}),p=h('input',{type:'password',placeholder:'Password',autocomplete:'current-password',required:'',maxlength:200});
- show(h('h2',{},'Marcar Ponto'),h('form',{onsubmit:async e=>{e.preventDefault();try{const d=await api('login',{username:u.value,password:p.value});tok=d.token;sessionStorage.setItem('t',tok);me=d.user;sessionStorage.setItem('u',JSON.stringify(me));me.role==='admin'?admin():user()}catch(x){alert(x.message)}}},u,p,h('button',{},'Entrar')))}
+ show(h('h2',{},'Marcar Ponto'),h('form',{onsubmit:async e=>{e.preventDefault();try{const d=await api('login',{username:u.value,password:p.value});tok=d.token;sessionStorage.setItem('t',tok);me=d.user;sessionStorage.setItem('u',JSON.stringify(me));start()}catch(x){alert(x.message)}}},u,p,h('button',{},'Entrar')))}
 function activate(t){const p=h('input',{type:'password',placeholder:'Nova password (mín. 10)',minlength:10,maxlength:200,required:'',autocomplete:'new-password'}),p2=h('input',{type:'password',placeholder:'Repetir',required:'',autocomplete:'new-password'});
  show(h('h2',{},'Definir password'),h('form',{onsubmit:async e=>{e.preventDefault();if(p.value!==p2.value)return alert('Passwords diferentes');try{await api('activate',{token:t,password:p.value});alert('Password definida. Faça login.');login()}catch(x){alert(x.message)}}},p,p2,h('button',{},'Guardar')))}
 async function shrink(f){const b=await createImageBitmap(f),s=Math.min(1,1280/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=b.width*s;c.height=b.height*s;c.getContext('2d').drawImage(b,0,0,c.width,c.height);return new Promise(r=>c.toBlob(r,'image/jpeg',.6))}
@@ -77,5 +79,10 @@ const pr=h('div');async function lp(){const d=await api('vr/all');pr.replaceChil
    h('p',{},h('b',{},'Férias: '),a,z,btn('Marcar',async()=>{const d=await api('vacation/'+u.id,{from:a.value,to:z.value});alert(d.n+' dias de férias');sel(u)})))}
  const nm=h('input',{placeholder:'Nome',maxlength:60}),un=h('input',{placeholder:'utilizador',maxlength:30});
  const dn=h('input',{placeholder:'Novo departamento',maxlength:40});show(head(),pr,h('h3',{},'Novo utilizador'),h('div',{},nm,un,btn('Criar',async()=>{const d=await api('users',{name:nm.value,username:un.value});nm.value=un.value='';link(d.token);ref()})),h('h3',{},'Departamentos e utilizadores'),h('div',{},dn,btn('Criar departamento',async()=>{await api('depts',{name:dn.value});dn.value='';ref()})),list,det);ref().catch(x=>alert(x.message));lp().catch(()=>{})}
+async function start(){const k='h:'+me.id,snap=sessionStorage.getItem(k),go=()=>{me.role==='admin'?admin():user();PRE={}};
+ if(snap){try{PRE=JSON.parse(snap)}catch{PRE={}}go()}
+ try{const f=await api(me.role==='admin'?'adminhome':'home?m='+new Date().toLocaleDateString('sv-SE').slice(0,7)),j=JSON.stringify(f);
+  if(j!==snap){sessionStorage.setItem(k,j);const a=document.activeElement;if(!snap||!(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName))){PRE=f;go()}}}catch(x){if(!snap)alert(x.message)}}
+if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 (async()=>{const m=location.hash.match(/^#invite=([\w-]{20,})$/);if(m){history.replaceState(null,'',location.pathname);return activate(m[1])}
- if(tok){try{me=JSON.parse(sessionStorage.getItem('u'))}catch{}if(!me||!me.role)try{me=await api('me')}catch{me=null}if(me)return me.role==='admin'?admin():user()}login()})();
+ if(tok){try{me=JSON.parse(sessionStorage.getItem('u'))}catch{}if(!me||!me.role)try{me=await api('me')}catch{me=null}if(me)return start()}login()})();
