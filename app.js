@@ -20,7 +20,7 @@ function login(){document.body.className='';const u=h('input',{placeholder:'Util
  show(h('h2',{},'Marcar Ponto'),h('form',{onsubmit:async e=>{e.preventDefault();try{const d=await api('login',{username:u.value,password:p.value});tok=d.token;sessionStorage.setItem('t',tok);me=d.user;sessionStorage.setItem('u',JSON.stringify(me));start()}catch(x){alert(x.message)}}},u,p,h('button',{},'Entrar')))}
 function activate(t){const p=h('input',{type:'password',placeholder:'Nova password (mín. 10)',minlength:10,maxlength:200,required:'',autocomplete:'new-password'}),p2=h('input',{type:'password',placeholder:'Repetir',required:'',autocomplete:'new-password'});
  show(h('h2',{},'Definir password'),h('form',{onsubmit:async e=>{e.preventDefault();if(p.value!==p2.value)return alert('Passwords diferentes');try{await api('activate',{token:t,password:p.value});alert('Password definida. Faça login.');login()}catch(x){alert(x.message)}}},p,p2,h('button',{},'Guardar')))}
-const td0=()=>new Date().toLocaleDateString('sv-SE'),WD='Seg Ter Qua Qui Sex Sáb Dom'.split(' '),mins=x=>{const[a,b]=x.split(':');return a*60+ +b},dt=t=>new Date(t).toLocaleString('pt-PT',{timeZone:'Europe/Lisbon'}),safe=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\w.-]+/g,'_').slice(0,60);
+const fmt=m=>`${Math.floor(m/60)}h${String(m%60).padStart(2,'0')}`,td0=()=>new Date().toLocaleDateString('sv-SE'),WD='Seg Ter Qua Qui Sex Sáb Dom'.split(' '),mins=x=>{const[a,b]=x.split(':');return a*60+ +b},dt=t=>new Date(t).toLocaleString('pt-PT',{timeZone:'Europe/Lisbon'}),safe=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\w.-]+/g,'_').slice(0,60);
 const saveAs=(b,n)=>{const u=URL.createObjectURL(b),a=h('a',{href:u,download:n});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),9e3)};
 const viewBlob=async p=>{const u=URL.createObjectURL(await p);document.body.append(h('img',{class:'ph',src:u,onclick:e=>{e.target.remove();URL.revokeObjectURL(u)}}))};
 const crc=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return b=>{let c=-1;for(const x of b)c=t[(c^x)&255]^(c>>>8);return(c^-1)>>>0}})();
@@ -38,14 +38,14 @@ const edit=async(ds,p)=>{const cur=[];for(let i=0;i<p.length;i+=2)cur.push(hm(p[
   const v=prompt(`Marcações de ${ds}: entrada-saída (ex: 09:00-13:00 14:00-18:00). Vazio apaga tudo.`,cur.join(' '));if(v===null)return;
   const list=[];for(const pr of v.trim().split(/\s+/).filter(Boolean)){const[e,x]=pr.split('-');list.push({kind:'in',time:e});if(x)list.push({kind:'out',time:x})}
   await api('punches/'+uid,{day:ds,p:list});box.load()};
- box.load=async()=>{try{const d=await api(`month/${uid}?m=${m}`),[y,mo]=m.split('-').map(Number),n=new Date(y,mo,0).getDate(),f=(new Date(y,mo-1,1).getDay()+6)%7;
+ box.load=async()=>{try{const d=await api(`month/${uid}?m=${m}`),hr=d.hr||{w:{},i:[],mt:0,mx:0,b:0},[y,mo]=m.split('-').map(Number),n=new Date(y,mo,0).getDate(),f=(new Date(y,mo-1,1).getDay()+6)%7;
   const g=h('div',{class:'g'},...'Seg Ter Qua Qui Sex Sáb Dom'.split(' ').map(x=>h('b',{},x)),...Array(f).fill(0).map(()=>h('i')));
   for(let i=1;i<=n;i++){const ds=`${m}-${String(i).padStart(2,'0')}`,s=d.s[ds],p=d.p.filter(x=>x.day===ds),j=d.j[ds],miss=s&&s.type==='T'&&ds<td&&!p.length,late=!!(s&&s.type==='T'&&s.start&&p[0]&&p[0].kind==='in'&&mins(hm(p[0].ts))-mins(s.start)>5);
    g.append(h('div',{class:'d '+(miss?(j?'J':'X'):late?(j?'J':'L'):s?s.type:'')+(ds===td?' now':'')},h('b',{},i),
     s&&h('small',{},s.type==='T'?(s.start||'')+'-'+(s.end||''):s.type==='F'?'Folga':'Férias'),
-    ...p.map(x=>h('small',{},(x.kind==='in'?'E ':'S ')+hm(x.ts))),adm&&btn('✎',()=>edit(ds,p)),
+    ...p.map(x=>h('small',{},(x.kind==='in'?'E ':'S ')+hm(x.ts))),hr.w[ds]!=null&&h('small',{},`⏱ ${fmt(hr.w[ds])}`+(hr.w[ds]>480?` (+${fmt(hr.w[ds]-480)})`:'')),hr.i.includes(ds)&&h('small',{},'⚠ sem saída'),adm&&btn('✎',()=>edit(ds,p)),
     miss&&(j?(adm?btn('Ver foto',()=>photo(j)):h('small',{},'Justificada')):(adm?h('small',{},'Falta'):btn('Justificar',()=>just(ds)))),late&&(j?(adm?btn('Ver foto (atraso)',()=>photo(j)):h('small',{},'Atraso justificado')):(adm?h('small',{},'⚠ Atraso'):btn('Justificar atraso',()=>just(ds))))))}
-  box.replaceChildren(h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},m),btn('▶',()=>go(1))),g)}catch(x){alert(x.message)}};
+  box.replaceChildren(h('p',{class:'sum'},`Este mês: ${fmt(hr.mt)} trabalhadas · ${fmt(hr.mx)} extra · Banco de horas: ${fmt(hr.b)}`),h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},m),btn('▶',()=>go(1))),g)}catch(x){alert(x.message)}};
  box.load();return box}
 function dcal(id,name){const box=h('div'),ed=h('div'),td=new Date().toLocaleDateString('sv-SE'),sn=h('input',{placeholder:'Turno (ex: Manhã)',maxlength:30}),s1=h('input',{type:'time'}),s2=h('input',{type:'time'});let m=td.slice(0,7),D={r:[],sh:[],us:[]};
  const go=n=>{const[y,mo]=m.split('-').map(Number),d=new Date(y,mo-1+n,1);m=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');box.load()};
