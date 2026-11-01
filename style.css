@@ -9,3 +9,6 @@ body.wide{max-width:1200px}.adm{display:grid;grid-template-columns:210px 1fr;gap
 .tabs{display:flex;gap:4px;margin:8px 0}.tabs .on{background:#222;color:#fff}.pre{white-space:pre-wrap;margin:4px 0}.L{background:#ffe8cc}.compose{display:grid;gap:6px;max-width:520px}.compose textarea{font:inherit;padding:8px}.chk{display:block}
 .sum{font-weight:600}
 .H{border:2px solid #c0392b}.hol{font-weight:600;color:#c0392b}
+.tb{border-collapse:collapse;width:100%}.tb th,.tb td{border:1px solid #ddd;padding:4px 6px;text-align:right;white-space:nowrap}.tb th:first-child,.tb td:first-child{text-align:left}.tb .tot{font-weight:700;background:#f2f2f2}
+.mapa th,.mapa td{text-align:center}.mapa td.l{text-align:left}.mapa .ln{margin:3px 0;font-weight:700}.mapa .nb{font-weight:400}.mapa .lg{width:auto;margin:8px 0}.mapa .ft{display:flex;gap:24px;align-items:center;margin-top:10px}.mapa .ger{margin-left:auto;margin-right:40px}.mapa th{background:#f2f2f2}.compose label{display:grid;gap:2px}
+@media print{.top,.side,.noprint,.tabs,button{display:none!important}body.wide{max-width:none;padding:0}.adm{display:block}.mapa .sc{overflow:visible}.mapa h2{margin:0}.tb th,.tb td{white-space:normal;font-size:11px;padding:2px 4px}@page{size:A4 landscape;margin:8mm}}
