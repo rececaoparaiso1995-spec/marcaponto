@@ -1,463 +1,879 @@
-/* ================================================================
-   MARCA PONTO — Design profissional e responsivo
-   Mobile-first · PC e telemóvel · Sem quebrar o JavaScript existente
-   ================================================================ */
+/* ============================================================
+   Ponto App — style.css (Mobile-first)
+   Referenciado em index.html como style.css?v=26
+   ============================================================ */
 
-/* ---------- Variáveis de design ---------- */
 :root {
-  --color-brand: #2563eb;
-  --color-brand-hover: #1d4ed8;
-  --color-brand-dark: #1e40af;
-  --color-surface: #ffffff;
-  --color-bg: #f8fafc;
-  --color-bg-alt: #f1f5f9;
-  --color-text: #0f172a;
-  --color-text-secondary: #475569;
-  --color-muted: #64748b;
-  --color-border: #e2e8f0;
-  --color-border-hover: #cbd5e1;
-  --color-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
-  --color-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
-  --radius: 12px;
-  --radius-sm: 8px;
-  --transition: 150ms ease;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --header-height: 64px;
-  --nav-width: 260px;
+  --color-primary: #1E40AF;
+  --color-primary-hover: #1E3A8A;
+  --color-cta-entry: #059669;
+  --color-cta-exit: #DC2626;
+  --color-cta-pause: #D97706;
+  --color-background: #FFFFFF;
+  --color-surface: #F8FAFC;
+  --color-text: #0F172A;
+  --color-text-muted: #64748B;
+  --color-border: #E2E8F0;
+  --color-success: #059669;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
+
+  /* Touch target mínimo para mobile (44px ≈ 2.75rem) */
+  --touch-target: 2.75rem;
 }
 
-/* ---------- Reset base ---------- */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
-
-html {
-  line-height: 1.5;
   -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  font: 16px/1.5 var(--font-sans);
+  font-family: var(--font-sans);
+  background: var(--color-background);
   color: var(--color-text);
-  background: var(--color-bg);
-  min-height: 100vh;
-  padding: 0;
-  max-width: none;
-  margin: 0;
-  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  line-height: 1.5;
+  /* Espaço para o botão fixo no fundo — evita esconder conteúdo em mobile */
+  padding-bottom: 96px;
+  overflow-x: hidden;
 }
 
-/* ---------- Utilitários ---------- */
-.hidden, [hidden] { display: none !important; }
-.sr-only {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0 0 0 0); border: 0; white-space: nowrap;
-}
-.nowrap { white-space: nowrap; }
-.block { display: block; }
-.flex { display: flex; }
-.flex-col { display: flex; flex-direction: column; }
-.items-center { align-items: center; }
-.justify-center { justify-content: center; }
-.justify-between { justify-content: space-between; }
-.gap-4 { gap: 0.5rem; }
-.gap-8 { gap: 1rem; }
-.mt-2 { margin-top: 0.5rem; }
-.mb-2 { margin-bottom: 0.5rem; }
-.w-full { width: 100%; }
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.text-left { text-align: left; }
-.font-semibold { font-weight: 600; }
-.font-bold { font-weight: 700; }
-.text-sm { font-size: 0.875rem; }
-.text-lg { font-size: 1.125rem; }
-.text-xl { font-size: 1.25rem; }
-.text-muted { color: var(--color-muted); }
-.rounded { border-radius: var(--radius); }
-.rounded-sm { border-radius: var(--radius-sm); }
-.shadow { box-shadow: var(--color-shadow); }
-.shadow-lg { box-shadow: var(--color-shadow-lg); }
-.border { border: 1px solid var(--color-border); }
-.cursor-pointer { cursor: pointer; }
-.overflow-auto { overflow: auto; }
-.relative { position: relative; }
-
-/* ---------- Scrollbar discreto ---------- */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-/* ---------- Botões ---------- */
-button {
-  font: inherit;
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-button:active { transform: scale(0.985); }
-button:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 2px; }
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.8rem 1.25rem;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #fff;
-  background: var(--color-brand);
-  border: 1px solid var(--color-brand);
-}
-.btn:hover { background: var(--color-brand-hover); border-color: var(--color-brand-hover); }
-.btn:active { transform: scale(0.98); }
-
-.btn-ghost {
-  background: transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
-}
-.btn-ghost:hover { background: var(--color-bg-alt); color: var(--color-text); border-color: var(--color-border-hover); }
-
-.btn-danger {
-  background: #fee2e2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
-}
-.btn-danger:hover { background: #fecaca; }
-
-.btn-sm { padding: 0.4rem 0.75rem; font-size: 0.85rem; }
-.btn-lg { padding: 0.8rem 1.5rem; font-size: 1rem; }
-.btn-block { width: 100%; }
-
-/* ---------- Inputs e formulários ---------- */
-input, select, textarea {
-  font: inherit;
-  width: 100%;
-  padding: 0.8rem 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
-}
-input::placeholder { color: var(--color-muted); }
-
-textarea { resize: vertical; min-height: 90px; font-family: inherit; }
-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 0.9rem center; background-size: 1rem; padding-right: 2.5rem; }
-
-label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 0.7rem; display: block; }
-.form-group { margin-bottom: 1.5rem; }
-.form-row { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
-
-.form-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  box-shadow: var(--color-shadow);
-}
-
-/* ---------- Cabeçalho / Top bar ---------- */
+/* ============================================================
+   TOPO — NOME DA PESSOA
+   ============================================================ */
 .top {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.25rem;
-  padding: 0 1.25rem;
-  height: var(--header-height);
-  background: var(--color-surface);
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--color-border);
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  flex-wrap: wrap;
+  background: var(--color-background);
 }
-.top b { font-size: 1.1rem; font-weight: 700; color: var(--color-text); }
-.top > span { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 
-/* ---------- Navegação por abas ---------- */
+.top b {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+.top span {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+/* ============================================================
+   TABS (horizontais, scroll em ecrãs pequenos)
+   ============================================================ */
 .tabs {
   display: flex;
-  gap: 0.5rem;
-  margin: 0;
+  gap: 6px;
+  padding: 10px 16px;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   overflow-x: auto;
   scrollbar-width: none;
 }
-.tabs button {
-  flex: 1 1 auto;
-  padding: 1rem 1rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-muted);
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
-}
-.tabs button:hover { color: var(--color-brand); background: var(--color-bg-alt); }
-.tabs button.on {
-  color: var(--color-brand);
-  border-bottom-color: var(--color-brand);
-  background: rgb(37 99 235 / 0.04);
+
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
-/* ---------- Layout Admin ---------- */
-body.wide { max-width: none; padding: 0; }
-.adm {
-  display: grid;
-  grid-template-columns: var(--nav-width) 1fr;
-  gap: 0;
-  height: calc(100vh - var(--header-height));
-  min-height: 0;
-}
-.side {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  background: var(--color-surface);
-  border-right: 1px solid var(--color-border);
-  overflow-y: auto;
-  position: sticky;
-  top: var(--header-height);
-  height: calc(100vh - var(--header-height));
-}
-.side button {
-  width: 100%;
-  text-align: left;
-  padding: 1rem 1.5rem;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
+.tabs button {
+  flex: 0 0 auto;
+  padding: var(--space-2) var(--space-4);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
   background: transparent;
-  border: none;
-  border-left: 3px solid transparent;
-  transition: all var(--transition);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: var(--touch-target);
   display: flex;
   align-items: center;
-  gap: 1rem;
-}
-.side button:hover { background: var(--color-bg-alt); color: var(--color-text); }
-.side button.on {
-  background: rgb(37 99 235 / 0.06);
-  color: var(--color-brand);
-  border-left-color: var(--color-brand);
-}
-.main {
-  overflow-y: auto;
-  padding: 2rem;
-  min-width: 0;
 }
 
-/* ---------- Cards ---------- */
+.tabs button:hover {
+  color: var(--color-primary);
+  background: rgba(30, 64, 175, 0.05);
+}
+
+.tabs button.on {
+  color: var(--color-primary);
+  background: rgba(30, 64, 175, 0.1);
+  border-color: rgba(30, 64, 175, 0.2);
+}
+
+/* ============================================================
+   BOTÃO FIXO NO FUNDO (ENTRADA / SAÍDA)
+   ============================================================ */
+.fixo-bottom {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--color-background);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -4px 16px -4px rgb(0 0 0 / 0.08);
+}
+
+button.big {
+  width: 100%;
+  max-width: 340px;
+  padding: 16px 24px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  text-align: center;
+  min-height: 3.25rem; /* acima do touch target mínimo */
+}
+
+button.big:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+button.big:active {
+  transform: scale(0.97);
+}
+
+button.big[data-k="in"] {
+  background: var(--color-cta-entry);
+  color: #FFFFFF;
+}
+
+button.big[data-k="in"]:hover {
+  filter: brightness(0.94);
+}
+
+button.big[data-k="out"] {
+  background: var(--color-cta-exit);
+  color: #FFFFFF;
+}
+
+button.big[data-k="out"]:hover {
+  filter: brightness(0.94);
+}
+
+/* ============================================================
+   CARDS / GENÉRICOS
+   ============================================================ */
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-  margin: 1rem 0;
-  box-shadow: var(--color-shadow);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
-.card h3, .card h4 { margin-bottom: 0.75rem; font-weight: 700; color: var(--color-text); }
 
-/* ---------- Calendário / grade de dias ---------- */
-.g {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-  margin: 0.75rem 0;
+.card h2,
+.top b {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--color-text);
 }
-.g > b {
-  text-align: center;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--color-muted);
-  padding: 0.5rem 0;
+
+.sum {
+  font-weight: 600;
+  font-size: 1.125rem;
 }
-.d {
-  min-height: 100px;
+
+/* ============================================================
+   MAPA DE TRABALHO (tabelas)
+   ============================================================ */
+.mapa {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.mapa table.tb {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  min-width: 600px; /* garante que não esmague em mobile */
+}
+
+.mapa table.tb th,
+.mapa table.tb td {
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 0.75rem;
-  font-size: 0.85rem;
-  overflow: hidden;
-  background: var(--color-surface);
-  transition: all var(--transition);
-  position: relative;
-}
-.d:hover { border-color: var(--color-brand); box-shadow: var(--color-shadow); }
-.d.now { outline: 2px solid var(--color-brand); outline-offset: -2px; z-index: 2; background: rgb(239 246 255); }
-.d small { display: block; margin-top: 0.5rem; line-height: 1.6; }
-.d .now { position: relative; }
-.d .now::after {
-  content: "";
-  position: absolute;
-  top: -2px; left: -2px; right: -2px; bottom: -2px;
-  border: 2px solid var(--color-brand);
-  border-radius: calc(var(--radius-sm) + 2px);
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* Cores dos tipos de dia (mantidas) */
-.T { background: #dcfce7; color: #166534; }
-.F { background: #f1f5f9; color: var(--color-muted); }
-.V { background: #dbeafe; color: #1e40af; }
-.X { background: #fee2e2; color: #991b1b; }
-.J { background: #fef3c7; color: #92400e; }
-.L { background: #ffe8cc; color: #92400e; }
-
-/* Estado de feriado / falta */
-.H { border: 2px solid var(--color-brand); background: rgb(239 246 255); }
-.hol { font-weight: 700; color: var(--color-brand-dark); }
-
-/* ---------- Tabelas ---------- */
-table { width: 100%; border-collapse: collapse; }
-table.tb, table.mapa { border: 1px solid var(--color-border); border-radius: var(--radius-sm); overflow: hidden; }
-table.tb th, table.tb td, table.mapa th, table.mapa td {
-  border: 1px solid var(--color-border);
-  padding: 0.8rem 1rem;
-  text-align: right;
-  font-size: 0.85rem;
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
   white-space: nowrap;
 }
-table.tb th:first-child, table.tb td:first-child { text-align: left; }
-table.mapa th, table.mapa td { text-align: center; }
-table.mapa td.l { text-align: left; }
-table.tb th { background: var(--color-bg-alt); font-weight: 700; color: var(--color-text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
-table.tb .tot { font-weight: 700; background: #f8fafc; }
-table.tb tr:nth-child(even) td { background: #fdfdfd; }
 
-/* Wrapper responsivo para tabelas */
-.table-wrap {
+.mapa table.tb th {
+  background: var(--color-surface);
+  font-weight: 600;
+}
+
+.mapa .ln {
+  margin: 8px 0;
+  font-size: 0.9375rem;
+}
+
+.mapa .nb {
+  font-weight: 600;
+}
+
+.mapa .ft {
+  margin-top: 16px;
+  font-size: 0.875rem;
+}
+
+.mapa .ft .ger {
+  margin-left: 12px;
+}
+
+/* ============================================================
+   RESPONSIVIDADE (breakpoints para smartphone)
+   ============================================================ */
+
+/* Até 375 px (iPhone SE, etc.) */
+@media (max-width: 375px) {
+  .top { padding: 12px 14px; flex-direction: column; gap: 4px; }
+  .top b { font-size: 1rem; }
+  .top span { font-size: 0.75rem; }
+  .tabs { padding: 8px 12px; gap: 4px; }
+  .tabs button { font-size: 0.8125rem; padding: var(--space-1) var(--space-3); }
+  body { padding-bottom: 96px; }
+  .fixo-bottom { padding: 8px 14px; gap: 8px; }
+  button.big {
+    font-size: 1rem;
+    padding: 14px 20px;
+    min-height: 3rem;
+  }
+  .mapa table.tb { font-size: 0.75rem; }
+}
+
+/* 376–480 px */
+@media (min-width: 376px) and (max-width: 480px) {
+  .top { flex-direction: row; align-items: center; justify-content: space-between; }
+  .top b { font-size: 1.125rem; }
+  body { padding-bottom: 90px; }
+  .fixo-bottom { padding: 8px 16px; gap: 8px; }
+}
+
+/* Tablet / desktop (> 480 px) */
+@media (min-width: 481px) {
+  body { padding-bottom: 80px; }
+  .top { flex-direction: row; align-items: center; justify-content: space-between; padding: 16px 20px; }
+  .top b { font-size: 1.25rem; }
+  .tabs { padding: 10px 20px; }
+  .fixo-bottom { padding: 12px 20px; gap: 12px; }
+  button.big { font-size: 1.125rem; padding: 16px 28px; min-height: 3.5rem; }
+  .mapa table.tb { font-size: 0.875rem; }
+}
+
+/* ============================================================
+   ADMIN — Painel de administração
+   ============================================================ */
+.adm {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: calc(100dvh - 60px);
+}
+
+/* Sidebar mobile — escondida por baixo do conteúdo */
+.adm .side {
+  position: fixed;
+  left: 0;
+  top: 56px;               /* abaixo do header .top */
+  bottom: 96px;            /* acima do botão fixo .fixo-bottom */
+  width: 200px;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  overflow-y: auto;
+  padding: 10px 0;
+  z-index: 100;
+  transform: translateX(-100%);
+  transition: transform 0.2s ease;
+}
+
+.adm .side.open {
+  transform: translateX(0);
+}
+
+.adm .side button {
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adm .side button:hover {
+  background: rgba(30, 64, 175, 0.05);
+  color: var(--color-primary);
+}
+
+.adm .side button.on {
+  background: rgba(30, 64, 175, 0.1);
+  color: var(--color-primary);
+  border-left: 3px solid var(--color-primary);
+}
+
+/* Conteúdo principal admin */
+.adm .main {
+  margin-left: 0;
+  padding: 16px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Botão abrir sidebar (só mobile) */
+.btn-menu-admin {
+  display: none;
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  border-radius: 6px;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 110;
+}
+
+/* Overlay ao abrir sidebar em mobile */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 90;
+  backdrop-filter: blur(2px);
+}
+.sidebar-overlay.open {
+  display: block;
+}
+
+/* Desktop — sidebar fixa à esquerda */
+@media (min-width: 640px) {
+  .adm {
+    flex-direction: row;
+  }
+  .adm .side {
+    position: static;
+    transform: none;
+    width: 220px;
+    height: auto;
+    bottom: auto;
+    border-right: 1px solid var(--color-border);
+    border-bottom: none;
+    flex-shrink: 0;
+  }
+  .adm .main {
+    margin-left: 220px;
+    padding: 20px;
+  }
+  .btn-menu-admin {
+    display: none !important;
+  }
+  .sidebar-overlay {
+    display: none !important;
+  }
+}
+
+@media (max-width: 639px) {
+  .btn-menu-admin {
+    display: block;
+  }
+}
+
+/* ============================================================
+   TABELAS ADMIN
+   ============================================================ */
+.adm table.tb {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.adm table.tb th,
+.adm table.tb td {
+  border: 1px solid var(--color-border);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.adm table.tb th {
+  background: var(--color-surface);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.adm .sc {
   overflow-x: auto;
-  margin: 1rem 0;
+  margin: 12px 0;
   -webkit-overflow-scrolling: touch;
 }
 
-/* ---------- Estados específicos ---------- */
-.big { font-size: 1.15rem; padding: 1.1rem 1.5rem; border-radius: var(--radius-sm); background: var(--color-brand); color: #fff; border: none; }
-.big:hover { background: var(--color-brand-hover); }
-.sum { font-weight: 700; color: var(--color-brand-dark); }
-.pre { white-space: pre-wrap; margin: 0.4rem 0; font-size: 0.9rem; line-height: 1.5; }
-.ph {
-  position: fixed;
-  inset: 0;
-  margin: auto;
-  max-width: 92vw;
-  max-height: 90vh;
-  background: #000;
-  border: 4px solid #fff;
-  border-radius: var(--radius);
-  z-index: 100;
-  object-fit: contain;
-  box-shadow: var(--color-shadow-lg);
-}
-.sc { overflow-x: auto; margin: 0.75rem 0; -webkit-overflow-scrolling: touch; }
-
-/* ---------- Compose / formulários longos ---------- */
-.compose { display: grid; gap: 1.25rem; max-width: 560px; }
-.compose textarea { font: inherit; padding: 0.8rem; }
-.chk { display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; margin: 0.9rem 0; cursor: pointer; }
-.chk input { width: auto; flex: 0 0 auto; }
-
-/* ---------- Password toggle ---------- */
-.pw { display: flex; gap: 0.75rem; align-items: center; }
-.pw input { flex: 1; min-width: 0; }
-
-/* ---------- Mapa / impressão ---------- */
-.mapa th { background: var(--color-bg-alt); }
-.mapa .ln { margin: 0.4rem 0; font-weight: 700; }
-.mapa .nb { font-weight: 400; color: var(--color-muted); }
-.mapa .lg { width: auto; margin: 1rem 0; }
-.mapa .ft { display: flex; gap: 1.5rem; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
-.mapa .ger { margin-left: auto; }
-
-@media print {
-  .top, .side, .noprint, .tabs, button, .sc, .compose button { display: none !important; }
-  body { background: #fff; padding: 0; max-width: none; }
-  .adm { display: block; }
-  .mapa .sc { overflow: visible; }
-  .mapa h2 { margin: 0; }
-  table.tb th, table.tb td { white-space: normal; font-size: 10px; padding: 3px 5px; }
-  @page { size: A4 landscape; margin: 8mm; }
+/* Linha total */
+.adm table.tb .tot {
+  font-weight: 700;
+  background: rgba(30, 64, 175, 0.05);
 }
 
-/* ---------- Utilitários de largura ---------- */
-.w { min-width: 700px; } /* tabelas largas — scroll em mobile */
-
-/* ---------- Responsividade (Mobile-first já é o base) ---------- */
-
-/* Tablet e acima */
-@media (min-width: 640px) {
-  .form-row { grid-template-columns: 1fr 1fr; }
-  .main { padding: 2rem; }
-  .top { padding: 0 1.5rem; }
+/* ============================================================
+   CARDS ADMIN
+   ============================================================ */
+.adm .card {
+  margin: 12px 0;
 }
 
-/* Desktop */
-@media (min-width: 1024px) {
-  .adm { grid-template-columns: var(--nav-width) 1fr; }
-  .side { position: sticky; top: var(--header-height); height: calc(100vh - var(--header-height)); overflow-y: auto; }
-  .tabs { overflow-x: visible; }
+/* ============================================================
+   INPUTS / FORMULÁRIOS ADMIN
+   ============================================================ */
+.adm input,
+.adm select,
+.adm textarea {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 0.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
+  color: var(--color-text);
+  margin-bottom: 10px;
 }
 
-/* Celulares pequenos */
-@media (max-width: 639px) {
-  .adm { grid-template-columns: 1fr; }
-  .side {
+.adm input:focus,
+.adm select:focus,
+.adm textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+/* Grupo compose (label + input + botão) */
+.adm .compose {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+@media (min-width: 481px) {
+  .adm .compose {
     flex-direction: row;
-    overflow-x: auto;
-    position: static;
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid var(--color-border);
-    padding: 0.25rem 0;
+    flex-wrap: wrap;
+    align-items: flex-end;
   }
-  .side button {
-    flex: 0 0 auto;
-    white-space: nowrap;
-    padding: 0.75rem 1.2rem;
-    font-size: 0.85rem;
-    border-left: none;
-    border-bottom: 3px solid transparent;
-    border-radius: var(--radius-sm);
-    margin-bottom: 0.25rem;
+  .adm .compose > label,
+  .adm .compose > input,
+  .adm .compose > select,
+  .adm .compose > button {
+    flex: 1;
+    min-width: 120px;
   }
-  .side button.on { background: rgb(37 99 235 / 0.1); border-bottom-color: var(--color-brand); border-left: none; border-radius: var(--radius-sm); }
-  .main { padding: 1rem; }
-  .top { flex-direction: column; align-items: stretch; gap: 0.75rem; padding: 1rem; height: auto; }
-  .top > span { justify-content: center; width: 100%; }
-  .g > b { font-size: 0.7rem; padding: 0.4rem 0; }
-  .d { min-height: 72px; font-size: 0.75rem; padding: 0.55rem; }
-  .btn { width: 100%; }
-  .btn-lg { width: 100%; }
-  table.tb td, table.tb th { font-size: 0.8rem; padding: 0.5rem 0.6rem; }
-  .form-card { padding: 1rem; }
-  .big { width: 100%; font-size: 1rem; padding: 0.9rem 1rem; }
-  .tabs button { padding: 0.7rem 0.5rem; font-size: 0.8rem; }
 }
 
-/* ---------- Estados de carga / util ---------- */
-.skeleton {
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
-  border-radius: var(--radius-sm);
-  height: 1rem;
+/* Checkbox admin */
+.adm .chk {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  cursor: pointer;
 }
-@keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* Aviso / erro */
+.adm .X {
+  color: var(--color-cta-exit);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+/* ============================================================
+   MAPA ADMIN (tabela larga)
+   ============================================================ */
+.adm .mapa {
+  overflow-x: auto;
+}
+
+/* Botões genéricos admin (menores que o botão fixo) */
+.adm button {
+  font-size: 0.875rem;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+}
+
+/* ============================================================
+   TOPO E TABS (classes usadas pelo app.js)
+   ============================================================ */
+.top {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-background);
+}
+.user-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.user-sub {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+.top-extra {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+/* ============================================================
+   CALENDÁRIO MENSAL (classes usadas pelo app.js cal())
+   ============================================================ */
+.g {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  margin-bottom: 8px;
+}
+.d {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
+  min-height: 100px;
+  justify-content: flex-start;
+  position: relative;
+}
+.d.now {
+  border-color: var(--color-primary);
+  background: rgba(30, 64, 175, 0.05);
+}
+.d.H { background: rgba(30, 64, 175, 0.1); }
+.d.X { background: rgba(220, 38, 38, 0.05); }
+.d.J { background: rgba(217, 119, 6, 0.05); }
+.d.L { background: rgba(217, 119, 6, 0.05); }
+.d.T { border-left: 3px solid var(--color-primary); }
+.d.F { border-left: 3px solid var(--color-cta-entry); }
+.d.V { border-left: 3px solid var(--color-cta-entry); }
+.hol { font-size: 0.65rem; color: var(--color-text-muted); margin-top: 2px; }
+
+/* ============================================================
+   VISTA DE 5 DIAS CORRIDOS (cal5)
+   ============================================================ */
+.cal-5dias {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 3px;
+}
+.dia-semana {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
+  min-height: 150px;
+  justify-content: flex-start;
+  position: relative;
+}
+.dia-semana.hoje {
+  border-color: var(--color-primary);
+  background: rgba(30, 64, 175, 0.05);
+}
+.dia-num {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.dia-num.hoje { color: var(--color-primary); }
+.dia-semana-nome {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.dia-turno {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-align: center;
+  line-height: 1.1;
+}
+.dia-turno.t { color: var(--color-primary); }
+.dia-turno.f { color: var(--color-text-muted); }
+.dia-turno.v { color: var(--color-cta-entry); }
+.dia-marcacoes {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+}
+.marcacao {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+.marcacao.in {
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--color-cta-entry);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+.marcacao.out {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--color-cta-exit);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+.marcacao .letra { font-size: 0.65rem; }
+.dia-vazio {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  margin-top: auto;
+  text-align: center;
+}
+.semana-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 12px;
+}
+.btn-seta {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-primary);
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+.btn-seta:active { transform: scale(0.95); }
+.semana-label {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-text);
+  text-align: center;
+  flex: 1;
+}
+.resumo {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.resumo-item {
+  text-align: center;
+  padding: 12px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.resumo-valor {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+.resumo-label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 3px;
+}
+.legenda {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+}
+.legenda span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ============================================================
+   CALENDÁRIO DEPARTAMENTO (dcal)
+   ============================================================ */
+.g.w { grid-template-columns: repeat(7, 1fr); }
+.d.dd { min-height: 110px; }
+
+/* ============================================================
+   ADMIN — CLASSES (sem sidebar lateral)
+   ============================================================ */
+.adm { display: flex; flex-direction: column; gap: 0; min-height: calc(100dvh - 120px); }
+.adm .main { padding: 16px; flex: 1; overflow-y: auto; }
+.adm .sc { overflow-x: auto; margin: 12px 0; -webkit-overflow-scrolling: touch; }
+.adm table.tb { width: 100%; border-collapse: collapse; font-size: 0.8125rem; min-width: 550px; }
+.adm table.tb th, .adm table.tb td { border: 1px solid var(--color-border); padding: 8px 10px; text-align: left; vertical-align: top; white-space: nowrap; }
+.adm table.tb th { background: var(--color-surface); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); }
+.adm .compose { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; }
+@media (min-width: 481px) {
+  .adm .compose { flex-direction: row; flex-wrap: wrap; align-items: flex-end; }
+  .adm .compose > label, .adm .compose > input, .adm .compose > select, .adm .compose > button { flex: 1; min-width: 120px; }
+}
+.adm .compose input, .adm .compose select, .adm .compose textarea { width: 100%; padding: 8px 10px; font-size: 0.875rem; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-background); color: var(--color-text); margin-bottom: 0; }
+.adm .compose input:focus, .adm .compose select:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1); }
+.adm .chk { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; color: var(--color-text); cursor: pointer; }
+.adm .X { color: var(--color-cta-exit); font-size: 0.8125rem; font-weight: 600; }
+.adm .sum { font-weight: 600; font-size: 1.125rem; }
+.adm button { font-size: 0.875rem; padding: 6px 12px; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-background); color: var(--color-text); cursor: pointer; }
+.adm button:hover { background: rgba(30, 64, 175, 0.05); }
+.adm button.primary { background: var(--color-primary); color: #FFFFFF; border-color: var(--color-primary); }
+.adm button.primary:hover { background: var(--color-primary-hover); }
+.adm button.danger { background: var(--color-cta-exit); color: #FFFFFF; border-color: var(--color-cta-exit); }
+.adm button.danger:hover { filter: brightness(0.94); }
+.adm button.success { background: var(--color-cta-entry); color: #FFFFFF; border-color: var(--color-cta-entry); }
+.adm button.success:hover { filter: brightness(0.94); }
+.adm .ln { margin: 8px 0; font-size: 0.9375rem; }
+.adm .nb { font-weight: 600; }
+.adm .ft { margin-top: 16px; font-size: 0.875rem; }
+.adm .ft .ger { margin-left: 12px; }
+.adm .mapa { max-width: 100%; overflow-x: auto; }
+
+/* ============================================================
+   IMPRESSÃO (@media print) — Mapa de trabalho
+   ============================================================ */
+@media print {
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    padding-bottom: 0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .noprint,
+  .fixo-bottom,
+  .tabs,
+  .top button,
+  button[noprint],
+  .card button,
+  .X,
+  .ph,
+  .adm,
+  .side,
+  .main button {
+    display: none !important;
+  }
+
+  .mapa {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
+  .mapa table.tb {
+    page-break-inside: auto;
+    width: 100% !important;
+    border: 1px solid #000 !important;
+  }
+
+  .mapa table.tb th,
+  .mapa table.tb td {
+    border: 1px solid #000 !important;
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .mapa h2 {
+    page-break-before: always;
+  }
+
+  .mapa table.tb tr {
+    page-break-inside: avoid;
+  }
+
+  .mapa table.tb thead {
+    display: table-header-group;
+  }
+
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+}
+
+/* ============================================================
+   REDUZIDO MOVIMENTO
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
