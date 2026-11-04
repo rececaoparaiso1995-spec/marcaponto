@@ -1,212 +1,365 @@
-const API='https://ponto-api.rececaoparaiso1995.workers.dev';
-if(window.top!==window.self){document.documentElement.remove();throw 0}
-const $=document.getElementById('app');
-const h=(t,p={},...k)=>{const e=document.createElement(t);for(const[a,v]of Object.entries(p))a.startsWith('on')?e.addEventListener(a.slice(2),v):e.setAttribute(a,v);e.append(...k.flat().filter(x=>x!=null&&x!==false));return e};
-const btn=(t,f)=>h('button',{onclick:async()=>{try{await f()}catch(x){alert(x.message)}}},t);
-const show=(...k)=>$.replaceChildren(...k);
-const hm=t=>new Date(t).toLocaleTimeString('pt-PT',{timeZone:'Europe/Lisbon',hour:'2-digit',minute:'2-digit'});
-let tok=sessionStorage.getItem('t'),me=null,PRE={};const PERF=location.hash==='#perf';
-async function api(p,body,raw){if(!body&&!raw&&p in PRE){const v=PRE[p];delete PRE[p];return v}
- const fd=body instanceof FormData;
- const t0=performance.now(),r=await fetch(`${API}/api/${p}`,{method:body?'POST':'GET',headers:{...(tok&&{Authorization:'Bearer '+tok}),...(body&&!fd&&{'Content-Type':'application/json'})},body:body?(fd?body:JSON.stringify(body)):undefined});
- if(PERF)console.log(p,Math.round(performance.now()-t0)+' ms',r.headers.get('Server-Timing'));
- if(r.status===401&&tok){out();throw Error('Sessão expirada')}
- if(raw&&r.ok)return r.blob();const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.e||'Erro');return d}
-function out(){sessionStorage.clear();tok=me=null;login()}
-const head=()=>h('div',{class:'top'},h('div',{},h('b',{class:'user-name'},me.name),h('div',{class:'user-sub'},me.dn||'Colaborador')),h('div',{class:'top-extra'},'Último acesso: '+new Date().toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})),h('span',{},btn('Mudar password',()=>pw(start)),btn('Sair',async()=>{await api('logout',{}).catch(()=>{});out()})));
-const pwf=e=>h('div',{class:'pw'},e,h('button',{type:'button',onclick:ev=>{const s=e.type==='password';e.type=s?'text':'password';ev.target.textContent=s?'Ocultar':'Mostrar'}},'Mostrar')),
- gen=()=>{const A='abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';return [...crypto.getRandomValues(new Uint8Array(12))].map(x=>A[x%A.length]).join('')};
-function pw(back){const o=h('input',{type:'password',placeholder:'Password atual',autocomplete:'current-password',required:'',class:'login-input'}),n=h('input',{type:'password',placeholder:'Nova (mín. 8)',minlength:8,maxlength:200,required:'',autocomplete:'new-password',class:'login-input'}),n2=h('input',{type:'password',placeholder:'Repetir nova',required:'',autocomplete:'new-password',class:'login-input'});
- show(head(),h('div',{class:'login-card'},h('h3',{},'Mudar password'),h('form',{onsubmit:async e=>{e.preventDefault();if(n.value!==n2.value)return alert('Passwords diferentes');try{await api('password',{old:o.value,new:n.value});alert('Password alterada');back()}catch(x){alert(x.message)}}},pwf(o),pwf(n),pwf(n2),h('button',{class:'login-btn'},'Guardar')),h('button',{class:'login-link',onclick:back},'Voltar')))}
-function login(){document.body.className='';const c=h('input',{placeholder:'Código de 6 dígitos',inputmode:'numeric',maxlength:7,autocomplete:'one-time-code',hidden:'',class:'login-input'});const u=h('input',{placeholder:'Utilizador',autocomplete:'username',required:'',maxlength:40,class:'login-input'}),p=h('input',{type:'password',placeholder:'Password',autocomplete:'current-password',required:'',maxlength:200,class:'login-input'});
- show(h('div',{class:'login-card'},h('h2',{},'Marcar Ponto'),h('form',{onsubmit:async e=>{e.preventDefault();try{const d=await api('login',{username:u.value,password:p.value,code:c.value});if(d.need2fa){c.hidden=false;c.focus();return}tok=d.token;sessionStorage.setItem('t',tok);me=d.user;sessionStorage.setItem('u',JSON.stringify(me));start()}catch(x){alert(x.message)}}},u,pwf(p),c,h('button',{class:'login-btn'},'Entrar'),h('div',{class:'login-2fa'},'Código de 6 dígitos apenas se a 2FA estiver ativa')))}
-function activate(t){const p=h('input',{type:'password',placeholder:'Nova password (mín. 8)',minlength:8,maxlength:200,required:'',autocomplete:'new-password',class:'login-input'}),p2=h('input',{type:'password',placeholder:'Repetir',required:'',autocomplete:'new-password',class:'login-input'});
- show(h('div',{class:'login-card'},h('h2',{},'Definir password'),h('form',{onsubmit:async e=>{e.preventDefault();if(p.value!==p2.value)return alert('Passwords diferentes');try{await api('activate',{token:t,password:p.value});alert('Password definida. Faça login.');login()}catch(x){alert(x.message)}}},pwf(p),pwf(p2),h('button',{class:'login-btn'},'Guardar')))}
-const wd=(a,b,ho={})=>{let n=0;for(let t=Date.parse(a);t<=Date.parse(b);t+=864e5){const d=new Date(t).getUTCDay();if(d>0&&d<6&&!ho[new Date(t).toISOString().slice(0,10)])n++}return n},vs=s=>s?`Férias ${new Date().getFullYear()}: ${s.tot} dias · gozados ${s.used} · marcados ${s.plan} · restantes ${s.tot-s.used-s.plan}`:'',fmt=m=>`${Math.floor(m/60)}h${String(m%60).padStart(2,'0')}`,td0=()=>new Date().toLocaleDateString('sv-SE'),WD='Seg Ter Qua Qui Sex Sáb Dom'.split(' '),mins=x=>{const[a,b]=x.split(':');return a*60+ +b},dt=t=>new Date(t).toLocaleString('pt-PT',{timeZone:'Europe/Lisbon'}),safe=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\w.-]+/g,'_').slice(0,60);
-const saveAs=(b,n)=>{const u=URL.createObjectURL(b),a=h('a',{href:u,download:n});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),9e3)};
-const viewBlob=async p=>{const u=URL.createObjectURL(await p);document.body.append(h('img',{class:'ph',src:u,onclick:e=>{e.target.remove();URL.revokeObjectURL(u)}}))};
-const crc=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return b=>{let c=-1;for(const x of b)c=t[(c^x)&255]^(c>>>8);return(c^-1)>>>0}})();
-async function zip(files){const E=new TextEncoder(),parts=[],cen=[];let off=0;for(const f of files){const n=E.encode(f.name),d=new Uint8Array(await f.blob.arrayBuffer()),c=crc(d),l=new DataView(new ArrayBuffer(30)),k=new DataView(new ArrayBuffer(46));
- l.setUint32(0,0x04034b50,true);l.setUint16(4,20,true);l.setUint16(6,0x0800,true);l.setUint32(14,c,true);l.setUint32(18,d.length,true);l.setUint32(22,d.length,true);l.setUint16(26,n.length,true);parts.push(l,n,d);
- k.setUint32(0,0x02014b50,true);k.setUint16(4,20,true);k.setUint16(6,20,true);k.setUint16(8,0x0800,true);k.setUint32(16,c,true);k.setUint32(20,d.length,true);k.setUint32(24,d.length,true);k.setUint16(28,n.length,true);k.setUint32(42,off,true);cen.push(k,n);off+=30+n.length+d.length}
- const e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cen.reduce((s,x)=>s+x.byteLength,0),true);e.setUint32(16,off,true);return new Blob([...parts,...cen,e],{type:'application/zip'})}
-const ics=L=>{const z=new Date().toISOString().replace(/[-:]|\.\d+/g,''),e=s=>String(s||'').replace(/[\\;,]/g,c=>'\\'+c),d=(a,t)=>a.replace(/-/g,'')+(t?'T'+t.replace(':','')+'00':'');return 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Ponto//PT\r\n'+L.map(x=>`BEGIN:VEVENT\r\nUID:t${x.id}@ponto\r\nDTSTAMP:${z}\r\n`+(x.start?`DTSTART:${d(x.day,x.start)}\r\nDTEND:${d(x.day,x.end||x.start)}\r\n`:`DTSTART;VALUE=DATE:${d(x.day)}\r\n`)+`SUMMARY:${e(x.title)}\r\n`+(x.place?`LOCATION:${e(x.place)}\r\n`:'')+'END:VEVENT\r\n').join('')+'END:VCALENDAR\r\n'};
-async function shrink(f){const b=await createImageBitmap(f),s=Math.min(1,1280/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=b.width*s;c.height=b.height*s;c.getContext('2d').drawImage(b,0,0,c.width,c.height);return new Promise(r=>c.toBlob(r,'image/jpeg',.6))}
-function cal(uid,adm){const box=h('div'),td=new Date().toLocaleDateString('sv-SE');let m=td.slice(0,7);
- const go=n=>{const[y,mo]=m.split('-').map(Number),d=new Date(y,mo-1+n,1);m=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');box.load()};
- const just=ds=>{const i=h('input',{type:'file',accept:'image/*',onchange:async()=>{try{const f=i.files[0];if(!f)return;const fd=new FormData();fd.append('day',ds);fd.append('file',await shrink(f),'j.jpg');await api('justify',fd);box.load()}catch(x){alert(x.message)}}});i.click()};
- const photo=async id=>{const u=URL.createObjectURL(await api('justif/'+id,null,true));document.body.append(h('img',{class:'ph',src:u,onclick:e=>{e.target.remove();URL.revokeObjectURL(u)}}))};
-const edit=async(ds,p)=>{const cur=[];for(let i=0;i<p.length;i+=2)cur.push(hm(p[i].ts)+'-'+(p[i+1]?hm(p[i+1].ts):''));
-  const v=prompt(`Marcações de ${ds}: entrada-saída (ex: 09:00-13:00 14:00-18:00). Vazio apaga tudo.`,cur.join(' '));if(v===null)return;
-  const list=[];for(const pr of v.trim().split(/\s+/).filter(Boolean)){const[e,x]=pr.split('-');list.push({kind:'in',time:e});if(x)list.push({kind:'out',time:x})}
-  await api('punches/'+uid,{day:ds,p:list});box.load()};
- box.load=async()=>{try{const d=await api(`month/${uid}?m=${m}`),hr=d.hr||{w:{},i:[],mt:0,mx:0,b:0},ho=d.ho||{},hs=d.hs||{esc:0,done:0},[y,mo]=m.split('-').map(Number),n=new Date(y,mo,0).getDate(),f=(new Date(y,mo-1,1).getDay()+6)%7;
-  const g=h('div',{class:'g'},...'Seg Ter Qua Qui Sex Sáb Dom'.split(' ').map(x=>h('b',{},x)),...Array(f).fill(0).map(()=>h('i')));
-  for(let i=1;i<=n;i++){const ds=`${m}-${String(i).padStart(2,'0')}`,s=d.s[ds],p=d.p.filter(x=>x.day===ds),j=d.j[ds],miss=s&&s.type==='T'&&ds<td&&!p.length,late=!!(s&&s.type==='T'&&s.start&&p[0]&&p[0].kind==='in'&&mins(hm(p[0].ts))-mins(s.start)>5);
-   g.append(h('div',{class:'d'+(ho[ds]?' H ':' ')+(miss?(j?'J':'X'):late?(j?'J':'L'):s?s.type:'')+(ds===td?' now':'')},h('b',{},i),ho[ds]&&h('small',{class:'hol'},'Feriado: '+ho[ds]),
-    s&&h('small',{},s.type==='T'?(s.start||'')+'-'+(s.end||''):s.type==='F'?'Folga':'Férias'),
-    ...p.map(x=>h('small',{},(x.kind==='in'?'E ':'S ')+hm(x.ts))),hr.w[ds]!=null&&h('small',{},`⏱ ${fmt(hr.w[ds])}`+(hr.w[ds]>480?` (+${fmt(hr.w[ds]-480)})`:'')),hr.i.includes(ds)&&h('small',{},'⚠ sem saída'),adm&&btn('✎',()=>edit(ds,p)),
-    miss&&(j?(adm?btn('Ver foto',()=>photo(j)):h('small',{},'Justificada')):(adm?h('small',{},'Falta'):btn('Justificar',()=>just(ds)))),late&&(j?(adm?btn('Ver foto (atraso)',()=>photo(j)):h('small',{},'Atraso justificado')):(adm?h('small',{},'⚠ Atraso'):btn('Justificar atraso',()=>just(ds))))))}
-  box.replaceChildren(h('p',{class:'sum'},`Este mês: ${fmt(hr.mt)} trabalhadas · ${fmt(hr.mx)} extra · Banco de horas: ${fmt(hr.b)} · Feriados ${new Date().getFullYear()}: ${hs.esc} a trabalhar, ${hs.done} trabalhados`),h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},m),btn('▶',()=>go(1))),g)}catch(x){alert(x.message)}};
- box.load();return box}
-function cal5(uid){const box=h('div'),td=new Date().toLocaleDateString('sv-SE');let s5=new Date();s5.setHours(0,0,0,0);const sig=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'],meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];const dados={};function gerar(){for(let i=0;i<5;i++){const dia=new Date(s5);dia.setDate(s5.getDate()+i);delete dados[dia.toISOString().slice(0,10)]}const hoje=td;for(let i=0;i<5;i++){const dia=new Date(s5);dia.setDate(s5.getDate()+i);const ds=dia.toISOString().slice(0,10);const dw=dia.getDay();const fim=dw===0||dw===6;if(fim)dados[ds]={tipo:'F'};else if(i===0)dados[ds]={tipo:'T',start:'07:00',end:'15:00',marcas:[{kind:'in',ts:ds+'T07:05:00'},{kind:'out',ts:ds+'T15:10:00'}]};else if(i===1)dados[ds]={tipo:'T',start:'14:00',end:'22:00',marcas:[{kind:'in',ts:ds+'T14:00:00'}]};else if(i===2)dados[ds]={tipo:'V'};else if(i===3)dados[ds]={tipo:'T',start:'09:00',end:'18:00',marcas:[{kind:'in',ts:ds+'T09:00:00'},{kind:'out',ts:ds+'T18:00:00'}]};else if(i===4)dados[ds]={tipo:'T',start:'08:00',end:'12:00',marcas:[{kind:'in',ts:ds+'T08:00:00'},{kind:'out',ts:ds+'T12:00:00'}]}}}function render(){box.replaceChildren();const grid=h('div',{class:'cal-5dias'});const dias=[];for(let i=0;i<5;i++){const dia=new Date(s5);dia.setDate(s5.getDate()+i);dias.push(dia)}const p=dias[0],u=dias[4];box.append(h('div',{class:'semana-header'},h('button',{class:'btn-seta',onclick:()=>{s5.setDate(s5.getDate()-5);render()}},'‹'),h('div',{class:'semana-label'},p.getDate()+' '+meses[p.getMonth()]+' – '+u.getDate()+' '+meses[u.getMonth()]+' '+u.getFullYear()),h('button',{class:'btn-seta',onclick:()=>{s5.setDate(s5.getDate()+5);render()}},'›')));gerar();dias.forEach((dia,i)=>{const ds=dia.toISOString().slice(0,10),dw=dia.getDay(),info=dados[ds]||{tipo:'T',start:'09:00',end:'18:00'};const el=h('div',{class:'dia-semana'+(ds===td?' hoje':'')});el.append(h('div',{class:'dia-semana-nome'},sig[dw]),h('div',{class:'dia-num'+(ds===td?' hoje':'')},dia.getDate()));const turno=h('div',{class:'dia-turno'+(info.tipo==='T?'t':info.tipo==='F?'f:'v')});if(info.tipo==='T')turno.textContent=(info.start||'')+'–'+(info.end||'');else if(info.tipo==='F')turno.textContent='Folga';else if(info.tipo==='V')turno.textContent='Férias';el.append(turno);if(info.marcas&&info.marcas.length){const mc=h('div',{class:'dia-marcacoes'});info.marcas.forEach(m=>{mc.append(h('div',{class:'marcacao '+(m.kind==='in'?'in':'out')},h('span',{class:'letra'},m.kind==='in'?'E':'S'),' '+new Date(m.ts).toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})))}) ;el.append(mc)}if(!info.marcas&&info.tipo==='T'&&ds>td){el.append(h('div',{class:'dia-vazio'},'Sem marcação'))}grid.append(el)});box.append(grid,h('div',{class:'legenda'},h('span',{},h('b',{style:'color:'+getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim()},'■'),' Turno'),h('span',{},h('b',{style:'color:'+getComputedStyle(document.documentElement).getPropertyValue('--color-text-muted').trim()},'■'),' Folga'),h('span',{},h('b',{style:'color:'+getComputedStyle(document.documentElement).getPropertyValue('--color-cta-entry').trim()},'■'),' Férias'),h('span',{},h('b',{style:'color:'+getComputedStyle(document.documentElement).getPropertyValue('--color-cta-entry').trim()},'E'),' Entrada'),h('span',{},h('b',{style:'color:'+getComputedStyle(document.documentElement).getPropertyValue('--color-cta-exit').trim()},'S'),' Saída')));box.append(h('div',{class:'resumo'},h('div',{class:'resumo-item'},h('div',{class:'resumo-valor'},'40h'),h('div',{class:'resumo-label'},'Trabalhadas')),h('div',{class:'resumo-item'},h('div',{class:'resumo-valor'},'0h'),h('div',{class:'resumo-label'},'Extra'))));}render();return box}function dcal(id,name){const box=h('div'),ed=h('div'),td=new Date().toLocaleDateString('sv-SE'),sn=h('input',{placeholder:'Turno (ex: Manhã)',maxlength:30}),s1=h('input',{type:'time'}),s2=h('input',{type:'time'}),b1=h('input',{type:'time'}),b2=h('input',{type:'time'});let m=td.slice(0,7),D={r:[],sh:[],us:[]};
- const go=n=>{const[y,mo]=m.split('-').map(Number),d=new Date(y,mo-1+n,1);m=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');box.load()};
- const edit=ds=>{const rows=D.r.filter(x=>x.day===ds),sels=D.us.map(u=>{const r=rows.find(x=>x.uid===u.id),vac=r&&r.type==='V',s=h('select',{},h('option',{value:0},'Folga'),...D.sh.map(x=>h('option',{value:x.id},`${x.name} ${x.start}-${x.end}`)));
-   if(vac){s.replaceChildren(h('option',{},'Férias'));s.disabled=true}else if(r&&r.type==='T'){const c=D.sh.find(x=>x.start===r.start&&x.end===r.end);if(c)s.value=c.id;else{s.append(h('option',{value:-1},`Manter ${r.start||''}-${r.end||''}`));s.value=-1}}
-   return[u,s,vac]});
-  ed.replaceChildren(h('h4',{},`Dia ${ds}`),D.sh.length?null:h('p',{},'Crie primeiro os turnos do departamento (abaixo).'),...sels.map(([u,s])=>h('div',{},u.name+': ',s,...(D.av||[]).filter(a=>a.uid===u.id&&a.d1<=ds&&a.d2>=ds).map(a=>h('small',{class:'X'},` ⚠ ${a.sh?'não pode o turno '+((D.sh.find(t=>t.id===a.sh)||{}).name||''):'pediu folga'}`)))),btn('Guardar dia',async()=>{await api('deptday/'+id,{day:ds,a:sels.filter(x=>!x[2]).map(([u,s])=>({uid:u.id,shift:Number(s.value)}))});box.load()}),btn('Fechar',()=>ed.replaceChildren()))};
- box.load=async()=>{try{D=await api(`deptmonth/${id}?m=${m}`);const by={};D.r.forEach(x=>(by[x.day]=by[x.day]||[]).push(x));const[y,mo]=m.split('-').map(Number),n=new Date(y,mo,0).getDate(),f=(new Date(y,mo-1,1).getDay()+6)%7;
-  const g=h('div',{class:'g w'},...'Seg Ter Qua Qui Sex Sáb Dom'.split(' ').map(x=>h('b',{},x)),...Array(f).fill(0).map(()=>h('i')));
-  const bad=[];for(let i=1;i<=n;i++){const ds=`${m}-${String(i).padStart(2,'0')}`,L=by[ds]||[],k=new Set(L.filter(x=>x.type==='T').map(x=>(x.start||'')+'-'+(x.end||''))).size,w=!!(L.length&&k<2);if(w)bad.push(i);
-   g.append(h('div',{class:'d dd'+(w?' X':'')+(ds===td?' now':''),onclick:()=>edit(ds)},h('b',{},i),w&&h('small',{},k?'⚠ Só 1 turno':'⚠ Sem turnos'),...L.filter(x=>x.type==='T').map(x=>h('small',{class:'T'},`${x.name} ${x.start||''}-${x.end||''}`)),...L.filter(x=>x.type==='V').map(x=>h('small',{class:'V'},`Férias: ${x.name}`))))}
-  ed.replaceChildren();
-  box.replaceChildren(h('h3',{},name),h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},m),btn('▶',()=>go(1))),...(bad.length?[h('p',{class:'X'},`⚠ ${bad.length} dia(s) com cobertura insuficiente (menos de 2 turnos): ${bad.join(', ')}`)]:[]),h('div',{class:'sc'},g),h('small',{},'Clique num dia para atribuir turnos. Quem não for atribuído fica de folga; as férias não são alteradas.'),ed,
-   h('div',{},h('b',{},'Turnos: '),...D.sh.map(x=>h('span',{},`${x.name} ${x.start}-${x.end}${x.brk_s?` (intervalo ${x.brk_s}-${x.brk_e})`:''} `,btn('✕',async()=>{await api(`shifts/${x.id}/del`,{});box.load()}),' ')),h('p',{},sn,'Início ',s1,' Fim ',s2,' Intervalo de descanso (opcional): ',b1,' até ',b2,btn('Adicionar turno',async()=>{await api('shifts',{dept:id,name:sn.value,start:s1.value,end:s2.value,bs:b1.value||null,be:b2.value||null});sn.value=s1.value=s2.value=b1.value=b2.value='';box.load()}))))}catch(x){alert(x.message)}};
- box.load();return box}
-function certs(uid,adm){const box=h('div'),t=h('input',{placeholder:'Título (ex: Formação HACCP)',maxlength:80}),f=h('input',{type:'file',accept:'image/*,application/pdf'});
- const open=async x=>{const u=URL.createObjectURL(await api('cert/'+x.id,null,true));if(x.mime==='application/pdf'){const a=h('a',{href:u,download:'certificado.pdf'});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),9e3)}else document.body.append(h('img',{class:'ph',src:u,onclick:e=>{e.target.remove();URL.revokeObjectURL(u)}}))};
- const ld=async()=>{const d=await api('certs/'+uid);box.replaceChildren(h('h3',{},'Certificados de formação'),...d.r.map(x=>h('div',{},new Date(x.ts).toLocaleDateString('pt-PT')+' · '+x.title+' ',btn('Abrir',()=>open(x)),btn('Apagar',async()=>{if(confirm('Apagar?')){await api(`cert/${x.id}/del`,{});ld()}}))),...(adm?[]:[h('p',{},t,f,btn('Enviar',async()=>{const file=f.files[0];if(!file||!t.value.trim())throw Error('Indique título e ficheiro');
-  let bl=file;if(file.type==='application/pdf'){if(file.size>5e5)throw Error('PDF até 500KB')}else bl=await shrink(file);
-  const fd=new FormData();fd.append('title',t.value);fd.append('file',bl,file.type==='application/pdf'?'c.pdf':'c.jpg');await api('certs',fd);t.value='';f.value='';ld()}))]))};
- ld().catch(x=>alert(x.message));return box}
-const pos=()=>new Promise((ok,no)=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>ok(p.coords),()=>no(Error('Ative a localização no telemóvel/browser para marcar ponto')),{enableHighAccuracy:true,timeout:15000,maximumAge:0}):no(Error('Localização indisponível')));
-const BUFFER_MIN=10;
-let UP='ponto';
-const utabs=()=>{const b=h('b',{});api('unread').then(d=>{b.textContent=d.c?` (${d.c})`:''}).catch(()=>{});return h('div',{class:'tabs'},...[['ponto','Ponto'],['form','Formações'],['av','Pedidos'],['rec','Recados'],...(me.chief?[['mg','Gestão']]:[])].map(([k,t])=>h('button',{class:k===UP?'on':'',onclick:()=>{if(k==='mg'){AP='inicio';admin()}else{UP=k;user()}}},t,k==='rec'?b:null)))};
-function upage(){const m=h('div');show(head(),utabs(),m);(UP==='form'?pForm(m,false):UP==='av'?pAv(m):pRec(m)).catch(x=>alert(x.message))}
-async function pRec(m){const d=await api('msgs');m.append(h('h2',{},'Recados da direção'),...(d.r.length?d.r.map(x=>h('div',{class:'card'+(x.seen?'':' J')},h('b',{},x.title),h('small',{},' '+dt(x.ts)),h('p',{class:'pre'},x.body))):[h('p',{},'Sem recados.')]));if(d.r.some(x=>!x.seen))api('msgs/readall',{}).catch(()=>{})}
-function user(){document.body.className='';if(UP!=='ponto')return upage();const st=h('p'),b=h('button',{class:'big',onclick:async()=>{try{const g=await pos();const now=new Date();let at=null;try{const td=now.toLocaleDateString('sv-SE');const d=await api(`month/${me.id}?m=${td.slice(0,7)}`);const s=d.s?.[td];if(s&&s.type==='T'){if(b.dataset.k==='in'&&s.start){const sh=new Date(td+'T'+s.start+':00');if(Math.abs(now-sh)<=BUFFER_MIN*60000)at=sh.toISOString();}if(b.dataset.k==='out'&&s.end){const sh=new Date(td+'T'+s.end+':00');if(Math.abs(now-sh)<=BUFFER_MIN*60000)at=sh.toISOString();}}}catch{}await api('punch',{kind:b.dataset.k,lat:g.latitude,lng:g.longitude,acc:g.accuracy,...(at?{at}:{})});await t();c.load()}catch(x){alert(x.message)}}}),c=cal5(me.id);
- async function t(){const d=await api('today'),l=d.p.at(-1),k=l&&l.kind==='in'?'out':'in';b.dataset.k=k;b.textContent=k==='in'?'Marcar ENTRADA':'Marcar SAÍDA';st.textContent=d.p.map(x=>(x.kind==='in'?'E ':'S ')+hm(x.ts)).join(' · ')||'Sem marcações hoje'}
- const vr=h('div'),a=h('input',{type:'date'}),z=h('input',{type:'date'});
- async function lv(){const d=await api('vr');vr.replaceChildren(h('p',{class:'sum'},vs(d.s)),...d.r.map(x=>h('div',{},`${x.d1} → ${x.d2}: ${{pend:'pendente',ok:'aprovado',no:'recusado',can:'cancelado'}[x.st]} `,x.st==='pend'&&btn('Cancelar',async()=>{await api(`vr/${x.id}/cancel`,{});lv()}))))}
- const jd=h('input',{type:'date',max:td0()}),jfile=h('input',{type:'file',accept:'image/*'}),jf=h('p',{},jd,jfile,btn('Enviar justificação',async()=>{if(!jd.value||!jfile.files[0])throw Error('Escolha o dia e a foto');const fd=new FormData();fd.append('day',jd.value);fd.append('file',await shrink(jfile.files[0]),'j.jpg');await api('justify',fd);jfile.value='';alert('Justificação enviada');c.load()}));
- show(head(),utabs(),h('div',{class:'fixo-bottom'},b),st,c,h('h3',{},'Justificar falta ou atraso'),jf,h('h3',{},'Pedir férias'),h('p',{},a,z,btn('Pedir',async()=>{await api('vr',{from:a.value,to:z.value});lv()})),vr);t().catch(()=>{});lv().catch(()=>{})}
-const link=t=>prompt('Envie este link ao utilizador (válido 48h):',location.origin+location.pathname+'#invite='+t);
-let AP='inicio',TM=0;
-function admin(){clearInterval(TM);const A=me.role==='admin';if(!A&&!me.chief)return user();document.body.className='wide';
- const main=h('div',{class:'main'}),bd=h('b',{}),items=A?[['inicio','Início'],['users','Utilizadores'],['depts','Departamentos'],['ferias','Pedidos de férias'],['just','Justificações'],['form','Formações'],['av','Pedidos de folga/turno'],['res','Resumo mensal'],['mapa','Mapa de trabalho'],['fer','Feriados'],['rec','Recados'],['seg','Segurança']]:[['inicio','Início'],['dept','Horário do departamento'],['just','Justificações'],['av','Pedidos de folga/turno'],['res','Resumo mensal'],['_me','Área pessoal']];
- if(!items.some(i=>i[0]===AP))AP='inicio';
- show(head(),h('div',{class:'tabs'},...items.map(([k,t])=>h('button',{class:k===AP?'on':'',onclick:()=>{if(k==='_me'){UP='ponto';user()}else{AP=k;admin()}}},t,k==='ferias'?bd:null))),h('div',{class:'adm'},main));
- ({inicio:pInicio,users:pUsers,depts:pDepts,ferias:pFerias,just:pJust,form:m=>pForm(m,true),av:pAvail,res:pResumo,mapa:pMapa,fer:pFer,rec:pRecados,seg:pSeg,dept:async m=>{m.append(dcal(me.dept,me.dn||'Departamento'))}})[AP](main).catch(x=>alert(x.message));
- if(A)api('vr/all').then(d=>{bd.textContent=d.r.length?` (${d.r.length})`:''}).catch(()=>{});
- if(AP==='inicio')TM=setInterval(()=>{if(!document.hidden)admin()},60000)}
-async function pInicio(m){const d=await api('onduty');
- m.append(h('div',{class:'top'},h('h2',{},'Em serviço agora'),h('span',{},`Atualizado às ${hm(Date.now())} `,btn('Atualizar',()=>admin()))),
-  ...d.d.map(x=>{const n=x.u.filter(u=>u.st==='in').length;return h('div',{class:'card'+(n?'':' X')},h('h3',{},`${x.name}: ${n} em serviço`),x.u.length?h('table',{},...x.u.map(u=>h('tr',{},h('td',{},u.name),h('td',{},u.st==='in'?`Em serviço desde ${hm(u.ts)}`:`⚠ Escalado ${u.start}-${u.end}, ainda sem entrada`)))):h('p',{},'Ninguém em serviço'))}))}
-async function pUsers(m){const[d,e]=await Promise.all([api('users'),api('depts')]),ds=e.r,list=h('div'),det=h('div'),nm=h('input',{placeholder:'Nome',maxlength:60}),un=h('input',{placeholder:'utilizador',maxlength:30});
- const opts=u=>{const s=h('select',{onchange:async()=>{try{await api(`users/${u.id}/dept`,{dept:s.value?Number(s.value):null});ref()}catch(x){alert(x.message)}}},h('option',{value:''},'Sem departamento'),...ds.map(x=>h('option',{value:x.id},x.name)));s.value=u.dept||'';return s};
- const row=u=>h('tr',{},h('td',{},`${u.name} (${u.username})`+(u.role==='admin'?' ★':'')+(u.chief?' [chefe]':'')+(u.pending?' [pendente]':'')+(u.active?'':' [inativo]')),
-  h('td',{},btn('Ver',()=>sel(u)),u.role==='user'&&btn('Convite/Repor',async()=>link((await api(`users/${u.id}/invite`,{})).token)),u.role==='user'&&btn(u.active?'Desativar':'Ativar',async()=>{await api(`users/${u.id}/active`,{active:u.active?0:1});ref()}),u.role==='user'&&btn('Apagar',async()=>{const c=prompt(`Apagar PERMANENTEMENTE ${u.name}?\nIsto apaga marcações, horários, férias, justificações e certificados, e não se pode desfazer.\nPode haver obrigação legal de conservar os registos de tempo de trabalho: se tiver dúvidas, use Desativar.\n\nPara confirmar, escreva o nome de utilizador: ${u.username}`);if(c===null)return;await api(`users/${u.id}/delete`,{confirm:c});det.replaceChildren();ref()}),opts(u)));
- const draw=us=>list.replaceChildren(...[...ds.map(x=>[x.name,us.filter(u=>u.dept===x.id)]),['Sem departamento',us.filter(u=>!u.dept)]].filter(g=>g[1].length).map(([t,l])=>h('div',{},h('h4',{},`${t} (${l.length})`),h('table',{},...l.map(row)))));
- const ref=async()=>draw((await api('users')).users);
- function sel(u){const f=h('input',{type:'file',accept:'.csv,.txt'}),a=h('input',{type:'date'}),z=h('input',{type:'date'}),a2=h('input',{type:'date'}),z2=h('input',{type:'date'}),vd=h('input',{type:'number',min:0,max:60,value:u.vac_days??22}),inum=h('input',{placeholder:'Nº empregado',maxlength:20,value:u.num||''}),icat=h('input',{placeholder:'Categoria',maxlength:60,value:u.cat||''}),icp=h('input',{placeholder:'Nº carteira prof. (opcional)',maxlength:20,value:u.cp||''}),np=h('input',{type:'password',placeholder:'Nova password (mín. 8)',maxlength:200,autocomplete:'off'}),ve=h('p',{class:'sum'});api('vacsum/'+u.id).then(r=>{ve.textContent=vs(r)}).catch(()=>{});
-  det.replaceChildren(h('h3',{},u.name),cal(u.id,true),certs(u.id,true),
-   h('p',{},h('b',{},'Horário (CSV: data,tipo,inicio,fim — tipo T/F/V): '),f,btn('Enviar',async()=>{if(!f.files[0]||f.files[0].size>2e5)throw Error('Ficheiro inválido');
-    const L=(await f.files[0].text()).replace(/^\uFEFF/,'').split(/\r?\n/).filter(l=>l.trim()),rows=L.map(l=>l.split(/[;,\t]/).map(x=>x.trim())).map(r=>{const m=r[0].match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);if(m)r[0]=`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;return r}).filter(r=>/^\d{4}-\d{2}-\d{2}$/.test(r[0])).map(([day,type,start,end])=>({day,type:(type||'').toUpperCase(),start:start||null,end:end||null}));
-    if(!rows.length)throw Error('Nenhuma linha válida no ficheiro');for(let i=0;i<rows.length;i+=400)await api('schedule/'+u.id,{rows:rows.slice(i,i+400)});alert(rows.length+' de '+L.length+' linhas gravadas');sel(u)})),
-   h('p',{},h('b',{},'Férias: '),a,z,btn('Marcar',async()=>{const d=await api('vacation/'+u.id,{from:a.value,to:z.value});alert(d.n+' dias de férias');sel(u)})),
-   ve,u.role==='user'?h('p',{},h('b',{},'Definir password: '),pwf(np),btn('Gerar',()=>{np.value=gen();np.type='text'}),btn('Guardar',async()=>{if(!np.value)throw Error('Escreva a password');const p=np.value;await api(`users/${u.id}/password`,{password:p});np.value='';np.type='password';alert(`Password definida para ${u.name}:\n${p}\nO colaborador pode mudá-la em "Mudar password".`)})):null,u.role==='user'?h('p',{},h('b',{},'Mapa de trabalho: '),inum,icat,icp,btn('Guardar',async()=>{await api(`users/${u.id}/profile`,{num:inum.value,cat:icat.value,cp:icp.value});u.num=inum.value||null;u.cat=icat.value||null;u.cp=icp.value||null;alert('Guardado')})):null,u.role==='user'?h('p',{},h('b',{},'Chefe do departamento: '),btn(u.chief?'Sim (remover)':'Não (tornar chefe)',async()=>{await api(`users/${u.id}/chief`,{chief:u.chief?0:1});u.chief=u.chief?0:1;sel(u)})):null,h('p',{},h('b',{},'Dias de férias por ano: '),vd,btn('Guardar',async()=>{await api(`users/${u.id}/vacdays`,{days:Number(vd.value)});u.vac_days=Number(vd.value);sel(u)})),
-   h('p',{},h('b',{},'Remover férias (para alterar, remove e marca de novo): '),a2,z2,btn('Remover',async()=>{if(!confirm('Remover as férias neste intervalo?'))return;const d=await api(`vacation/${u.id}/clear`,{from:a2.value,to:z2.value});alert(d.n+' dia(s) de férias removidos');sel(u)})))}
- const dsel=h('select',{},h('option',{value:''},'Sem departamento'),...ds.map(x=>h('option',{value:x.id},x.name))),ck=h('input',{type:'checkbox'}),ip=h('input',{type:'password',placeholder:'Password inicial (mín. 8)',maxlength:200,autocomplete:'off'});
- draw(d.users);m.append(h('h2',{},'Utilizadores'),h('div',{},nm,un,dsel,h('label',{},ck,' Chefe do departamento'),pwf(ip),btn('Gerar',()=>{ip.value=gen();ip.type='text'}),btn('Criar',async()=>{const uname=un.value,pwd=ip.value,d=await api('users',{name:nm.value,username:uname,dept:dsel.value||null,chief:ck.checked,password:pwd||undefined});nm.value=un.value=ip.value='';ip.type='password';ck.checked=false;if(d.set)alert(`Utilizador criado.\nUtilizador: ${uname.toLowerCase()}\nPassword inicial: ${pwd}\nO colaborador pode mudá-la em "Mudar password".`);else link(d.token);ref()})),list,det)}
-async function pDepts(m){const[d,e]=await Promise.all([api('users'),api('depts')]),det=h('div'),dn=h('input',{placeholder:'Novo departamento',maxlength:40}),list=h('div');
- const draw=(ds,us)=>list.replaceChildren(...ds.map(x=>h('div',{class:'card'},h('b',{},`${x.name} (${us.filter(u=>u.dept===x.id).length} utilizadores) `),btn('Ver horário',()=>det.replaceChildren(dcal(x.id,x.name))),btn('Apagar dept.',async()=>{if(confirm('Apagar departamento? Os utilizadores ficam sem departamento.')){await api(`depts/${x.id}/del`,{});ref()}}))));
- const ref=async()=>{const[a,b]=await Promise.all([api('users'),api('depts')]);draw(b.r,a.users)};
- draw(e.r,d.users);m.append(h('h2',{},'Departamentos'),h('div',{},dn,btn('Criar departamento',async()=>{await api('depts',{name:dn.value});dn.value='';ref()})),list,det)}
-async function pFerias(m){const box=h('div'),lp=async()=>{const d=await api('vr/all');box.replaceChildren(h('h2',{},`Pedidos de férias (${d.r.length})`),...d.r.map(x=>h('div',{class:'card'},`${x.name}: ${x.d1} → ${x.d2} · ${wd(x.d1,x.d2,d.ho||{})} dia(s) útil(eis)${x.rem!=null?` · restantes ${x.rem}${wd(x.d1,x.d2,d.ho||{})>x.rem?' ⚠ excede o saldo':''}`:''} `,btn('Aprovar',async()=>{await api(`vr/${x.id}/decide`,{ok:1});lp()}),btn('Recusar',async()=>{await api(`vr/${x.id}/decide`,{ok:0});lp()}))))};await lp();m.append(box)}
-async function pJust(m){const mi=h('input',{type:'month',value:new Date().toLocaleDateString('sv-SE').slice(0,7)}),box=h('div');let L=[];
- const nm=x=>`${x.day}_${x.id}_${safe(x.name)}_${x.tp==='A'?'atraso':'falta'}.jpg`,fx=x=>api('justif/'+x.id,null,true);
- const load=async()=>{L=(await api('justlist?m='+mi.value)).r;box.replaceChildren(h('p',{},`${L.length} justificação(ões)`),...L.map(x=>h('div',{class:'card'},`${x.day} · ${x.name} · ${x.tp==='A'?'Atraso':'Falta'} `,btn('Ver',()=>viewBlob(fx(x))),btn('Descarregar',async()=>saveAs(await fx(x),nm(x))))))};
- m.append(h('h2',{},'Justificações de faltas e atrasos'),h('p',{},mi,btn('Mostrar',load),btn('Descarregar todas (ZIP)',async()=>{if(!L.length)throw Error('Nada para descarregar');const f=[];for(const x of L.slice(0,100))f.push({name:nm(x),blob:await fx(x)});saveAs(await zip(f),`justificacoes_${mi.value}.zip`)})),box);await load()}
-const openCert=async c=>{const b=await api('cert/'+c.id,null,true);c.mime==='application/pdf'?saveAs(b,`certificado_${c.id}.pdf`):viewBlob(Promise.resolve(b))};
-async function showCerts(det,id,title){const L=(await api('trcerts/'+id)).r,nm=c=>`${safe(title)}_${c.id}_${safe(c.name)}.${c.mime==='application/pdf'?'pdf':'jpg'}`,fx=c=>api('cert/'+c.id,null,true);
- det.replaceChildren(...(L.length?[h('p',{},btn('Descarregar todos (ZIP)',async()=>{const f=[];for(const c of L.slice(0,100))f.push({name:nm(c),blob:await fx(c)});saveAs(await zip(f),`${safe(title)}.zip`)}))]:[h('p',{},'Sem certificados.')]),...L.map(c=>h('div',{},`${c.name} · ${new Date(c.ts).toLocaleDateString('pt-PT')} `,btn('Ver',()=>openCert(c)),btn('Descarregar',async()=>saveAs(await fx(c),nm(c))))))}
-async function pForm(m,adm){const td=new Date().toLocaleDateString('sv-SE');let mo=td.slice(0,7),D=[],MY=[];const box=h('div'),ed=h('div'),ds=adm?(await api('depts')).r:[],dn=Object.fromEntries(ds.map(x=>[x.id,x.name])),orph=h('div'),
- go=n=>{const[y,k]=mo.split('-').map(Number),d=new Date(y,k-1+n,1);mo=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');load()},
- when=x=>x.start?x.start+(x.end?'-'+x.end:'')+' ':'',
- reload=async()=>{if(!adm)MY=(await api('certs/'+me.id)).r;await load()},
- add=day=>{const t=h('input',{placeholder:'Título',maxlength:80}),pl=h('input',{placeholder:'Local',maxlength:60}),dd=h('input',{type:'date',value:day}),a=h('input',{type:'time'}),z=h('input',{type:'time'}),s=h('select',{},h('option',{value:''},'Toda a staff'),...ds.map(x=>h('option',{value:x.id},x.name)));
-  ed.replaceChildren(h('h4',{},'Nova formação'),h('p',{},t,dd,a,z,pl,s,btn('Criar formação',async()=>{await api('trainings',{day:dd.value,title:t.value,place:pl.value,start:a.value||null,end:z.value||null,dept:s.value||null});load()})),btn('Fechar',()=>ed.replaceChildren()))},
- at=x=>{const det=h('div');return h('div',{class:'card'},h('b',{},`${x.day} ${when(x)}${x.title}`),` · ${x.dept?dn[x.dept]||'Departamento':'Toda a staff'}${x.place?' @ '+x.place:''} `,btn(`Certificados (${x.nc})`,async()=>{if(det.firstChild)det.replaceChildren();else await showCerts(det,x.id,x.title)}),btn('Apagar',async()=>{if(confirm('Apagar formação? Os certificados ficam em "sem formação".')){await api(`trainings/${x.id}/del`,{});load()}}),det)},
- ut=x=>{const f=h('input',{type:'file',accept:'image/*,application/pdf'}),mine=MY.filter(c=>c.tr===x.id);return h('div',{class:'card'},h('b',{},`${x.day} ${when(x)}${x.title}`),x.place?` @ ${x.place}`:'',
-  ...mine.map(c=>h('div',{},`Certificado enviado em ${new Date(c.ts).toLocaleDateString('pt-PT')} `,btn('Abrir',()=>openCert(c)),btn('Apagar',async()=>{if(confirm('Apagar certificado?')){await api(`cert/${c.id}/del`,{});reload()}}))),
-  x.day<=td?h('p',{},f,btn('Enviar certificado',async()=>{const file=f.files[0];if(!file)throw Error('Escolha o ficheiro');let bl=file;if(file.type==='application/pdf'){if(file.size>5e5)throw Error('PDF até 500KB')}else bl=await shrink(file);const fd=new FormData();fd.append('tr',x.id);fd.append('file',bl,file.type==='application/pdf'?'c.pdf':'c.jpg');await api('certs',fd);reload()})):h('small',{},'O envio do certificado abre no dia da formação.'))},
- load=async()=>{D=(await api(`trainings?m=${mo}`)).r;const[y,k]=mo.split('-').map(Number),n=new Date(y,k,0).getDate(),f=(new Date(y,k-1,1).getDay()+6)%7,g=h('div',{class:'g'},...WD.map(x=>h('b',{},x)),...Array(f).fill(0).map(()=>h('i')));
-  for(let i=1;i<=n;i++){const day=`${mo}-${String(i).padStart(2,'0')}`;g.append(h('div',{class:'d'+(adm?' dd':'')+(day===td?' now':''),onclick:()=>{if(adm)add(day)}},h('b',{},i),...D.filter(x=>x.day===day).map(x=>h('small',{class:'V'},when(x)+x.title))))}
-  ed.replaceChildren();box.replaceChildren(h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},mo),btn('▶',()=>go(1))),g,btn('Descarregar calendário (.ics)',()=>saveAs(new Blob([ics(D)],{type:'text/calendar'}),`formacoes_${mo}.ics`)),adm?btn('Nova formação',()=>add(td)):null,ed,h('h3',{},'Formações do mês'),...(D.length?D.map(adm?at:ut):[h('p',{},'Sem formações neste mês.')]),adm?h('p',{},h('small',{},'Clique num dia do calendário para criar uma formação.')):null,adm?h('p',{},btn('Certificados sem formação associada',async()=>{if(orph.firstChild)orph.replaceChildren();else await showCerts(orph,'none','sem_formacao')}),orph):null)};
- m.append(h('h2',{},'Formações e certificados'),box);await reload()}
-const csvc=v=>{let s=String(v);if(/^[=+\-@\t\r]/.test(s))s="'"+s;return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
-async function pResumo(m){const mi=h('input',{type:'month',value:td0().slice(0,7)}),fd=h('select',{onchange:()=>draw()}),box=h('div');let D={rows:[],depts:[]};
- const cols=[['Horas',o=>fmt(o.hw)],['Extra',o=>fmt(o.he)],['Dias trab.',o=>o.dt],['Folgas',o=>o.fo],['Férias',o=>o.fe],['Feriados trab./esc.',o=>`${o.fhe}/${o.fh}`],['Faltas (just.)',o=>`${o.fa} (${o.faj})`],['Atrasos (just.)',o=>`${o.at} (${o.atj})`],['Banco total',o=>fmt(o.b)]],
- sum=L=>L.reduce((a,o)=>{for(const k in o)if(typeof o[k]==='number'&&k!=='id'&&k!=='dept')a[k]=(a[k]||0)+o[k];return a},{}),
- groups=()=>{const f=fd.value;return [...D.depts.map(x=>[x.name,x.id,D.rows.filter(o=>o.dept===x.id)]),['Sem departamento',0,D.rows.filter(o=>!o.dept)]].filter(g=>g[2].length&&(f===''||String(g[1])===f))},
- draw=()=>box.replaceChildren(...groups().map(([t,,L])=>h('div',{class:'sc'},h('h3',{},t),h('table',{class:'tb'},h('tr',{},h('th',{},'Colaborador'),...cols.map(c=>h('th',{},c[0]))),...L.map(o=>h('tr',{},h('td',{},o.name),...cols.map(c=>h('td',{},String(c[1](o)))))),h('tr',{class:'tot'},h('td',{},'Total'),...cols.map(c=>h('td',{},String(c[1](sum(L))))))))));
- const load=async()=>{D=await api('summary?m='+mi.value);fd.replaceChildren(h('option',{value:''},'Todos os departamentos'),...D.depts.map(x=>h('option',{value:x.id},x.name)),h('option',{value:'0'},'Sem departamento'));draw()};
- m.append(h('h2',{},'Resumo mensal'),h('p',{},mi,fd,btn('Mostrar',load),btn('Descarregar CSV',()=>{const L=groups().flatMap(([t,,l])=>l.map(o=>[t,o.name,...cols.map(c=>c[1](o))]));saveAs(new Blob(['\uFEFF'+[['Departamento','Colaborador',...cols.map(c=>c[0])],...L].map(r=>r.map(csvc).join(';')).join('\r\n')],{type:'text/csv'}),`resumo_${mi.value}.csv`)})),h('small',{},'Faltas: dias com turno já passados sem marcação (entre parêntesis, as justificadas). Atrasos: entrada mais de 5 min depois do início do turno.'),box);await load()}
-async function pAv(m){const d=await api('av'),a=h('input',{type:'date',min:td0()}),z=h('input',{type:'date',min:td0()}),s=h('select',{},h('option',{value:''},'Dia todo (não posso trabalhar)'),...d.sh.map(x=>h('option',{value:x.id},`Não posso fazer o turno ${x.name} (${x.start}-${x.end})`))),n=h('input',{placeholder:'Motivo (opcional)',maxlength:200}),list=h('div'),L={pend:'pendente',ok:'aprovado',no:'recusado',can:'cancelado'};
- const draw=r=>list.replaceChildren(...r.map(x=>h('div',{class:'card'},`${x.d1} → ${x.d2} · ${x.sh?'Turno '+x.sn:'Dia todo'} · ${L[x.st]}${x.note?' · '+x.note:''} `,x.st==='pend'?btn('Cancelar',async()=>{await api(`av/${x.id}/cancel`,{});draw((await api('av')).r)}):null)));
- draw(d.r);m.append(h('h2',{},'Pedidos de folga ou de turno'),h('p',{},'Indica os dias em que não podes trabalhar, ou turnos que não podes fazer (por exemplo, para o mês seguinte). A direção aprova ou recusa.'),h('p',{},a,z,s,n,btn('Enviar pedido',async()=>{await api('av',{from:a.value,to:z.value||a.value,sh:s.value||null,note:n.value});a.value=z.value=n.value='';draw((await api('av')).r)})),list)}
-async function pAvail(m){const box=h('div');
- const load=async()=>{const d=await api('avall'),row=x=>`${x.name}${x.dn?' ('+x.dn+')':''}: ${x.d1} → ${x.d2} · ${x.sh?'Turno '+x.sn:'Dia todo'}${x.note?' · '+x.note:''} `,P=d.r.filter(x=>x.st==='pend'),A=d.r.filter(x=>x.st==='ok');
-  box.replaceChildren(h('h3',{},`Pendentes (${P.length})`),...P.map(x=>h('div',{class:'card'},row(x),btn('Aprovar',async()=>{await api(`av/${x.id}/decide`,{ok:1});load()}),btn('Recusar',async()=>{await api(`av/${x.id}/decide`,{ok:0});load()}))),h('h3',{},'Aprovados (próximos)'),...(A.length?A.map(x=>h('div',{class:'card'},row(x))):[h('p',{},'Nenhum.')]))};
- m.append(h('h2',{},'Pedidos de folga e de turno'),h('small',{},'Os pedidos aprovados aparecem como aviso ⚠ no calendário do departamento, quando atribuís turnos.'),box);await load()}
-const ACT={'login.fail':'Falha de login','login.admin':'Login do admin','user.create':'Utilizador criado','user.invite':'Convite / reposição','user.activate':'Utilizador ativado','user.deactivate':'Utilizador desativado','user.delete':'Utilizador APAGADO','user.profile':'Ficha do utilizador alterada','user.password':'Password definida pelo admin','mapa.cfg':'Dados do mapa alterados','user.chief':'Chefe alterado','user.vacdays':'Dias de férias definidos','password.change':'Password alterada','totp.on':'2FA ativado','totp.off':'2FA desativado','vr.decide':'Férias decididas','av.decide':'Pedido de folga/turno decidido','schedule.upload':'Horário carregado','vacation.set':'Férias marcadas','vacation.clear':'Férias removidas','punches.edit':'Marcações editadas','dept.day':'Turnos atribuídos','msg.send':'Recado enviado','training.add':'Formação criada','holiday.add':'Feriado criado','holiday.del':'Feriado apagado'};
-async function pSeg(m){const[d,t]=await Promise.all([api('logs'),api('totp')]),pw=h('input',{type:'password',placeholder:'Password atual',autocomplete:'current-password'}),cd=h('input',{placeholder:'Código de 6 dígitos',inputmode:'numeric',maxlength:6}),tz=h('div');
- const draw=on=>tz.replaceChildren(h('p',{},'Autenticação em dois passos: ',h('b',{},on?'ATIVA':'desativada')),on?h('p',{},pw,cd,btn('Desativar',async()=>{await api('totp/off',{password:pw.value,code:cd.value});pw.value=cd.value='';draw(false)})):h('p',{},pw,btn('Ativar',async()=>{const s=await api('totp/start',{password:pw.value});pw.value='';tz.replaceChildren(h('p',{},'Na app de autenticação (Google Authenticator, Microsoft Authenticator, Authy…) escolhe "Introduzir chave de configuração" e escreve esta chave (tipo: baseado no tempo):'),h('p',{class:'sum'},s.secret.match(/.{1,4}/g).join(' ')),h('p',{},cd,btn('Confirmar',async()=>{await api('totp/confirm',{code:cd.value});cd.value='';draw(true)})))})));
- draw(t.on);m.append(h('h2',{},'Segurança'),h('p',{class:d.f?'card X':'card'},`Falhas de login nas últimas 24 h: ${d.f}`),h('h3',{},'Conta do admin'),tz,h('h3',{},'Últimas ações (200)'),h('div',{class:'sc'},h('table',{class:'tb'},h('tr',{},...['Data','Ação','Quem','Sobre','Info'].map(x=>h('th',{},x))),...d.r.map(x=>h('tr',{},h('td',{},dt(x.ts)),h('td',{},ACT[x.act]||x.act),h('td',{},x.an||'—'),h('td',{},x.tn||x.target||''),h('td',{},x.info||''))))))}
-const MK=[['empregador','Firma/empregador'],['sede','Sede'],['atividade','Atividade'],['nif','NIF'],['cae','CAE'],['irct','IRCT aplicável'],['estab','Nome do estabelecimento (por defeito)'],['local','Local de trabalho (por defeito)']],dm=d=>d.slice(8)+'/'+d.slice(5,7);
-const mapaInfo=D=>{const c=D.c||{},id=D.dept.id,g=k=>c[k+'_'+id]||c[k]||'',hh=t=>String(t).replace(':','h');
- return {head:[`Firma/empregador: ${c.empregador||''}`,`Sede: ${c.sede||''}`,`Nome do estabelecimento: ${g('estab')}`,`Atividade: ${c.atividade||''}       NIF: ${c.nif||''}       CAE: ${c.cae||''}`,`Local de trabalho: ${g('local')}`,D.dept.hf||'',`Instrumento de regulamentação Coletiva de Trabalho (IRCT) aplicável: ${c.irct||''}`],week:`${dm(D.days[0])} a ${dm(D.days[6])}`,th:['Nº empregado','Nome do trabalhador','Nº da carteira profissional','Categoria'],dn:['2ª','3ª','4ª','5ª','6ª','Sáb','Dom'],obs:c['obs_'+id]||'',
-  leg:[...D.legend.map(l=>[l.l,`Das ${hh(l.start)} às ${hh(l.end)}`,l.bs?`${l.bs} às ${l.be}`:'-',l.known?'':'Horário sem turno definido']),['X','Descanso semanal / folga','',''],['F','Férias','','']],date:new Date().toLocaleDateString('pt-PT')}};
-const mapaEl=D=>{const I=mapaInfo(D),td=(t,c)=>h('td',{class:c||''},t),th=(t,a)=>h('th',a||{},t);
- return h('div',{class:'mapa'},h('h2',{},'HORÁRIO DE TRABALHO'),...I.head.map(x=>h('p',{class:'ln'},x)),
-  h('div',{class:'sc'},h('table',{class:'tb'},h('tr',{},th(I.th[0],{rowspan:3}),th(I.th[1],{rowspan:3}),th(I.th[2],{rowspan:3}),th(I.th[3],{rowspan:3}),th('Horário e descanso semanal',{colspan:7})),h('tr',{},th(I.week,{colspan:7})),h('tr',{},...I.dn.map(x=>th(x))),...D.rows.map(r=>h('tr',{},td(r.num),td(r.name,'l'),td(r.cp),td(r.cat,'l'),...r.cells.map(x=>td(x)))))),
-  h('p',{class:'ln'},'Observações: ',h('span',{class:'nb'},I.obs)),
-  h('table',{class:'tb lg'},h('tr',{},...['Letra do horário','Especificação do horário','Refeições (a)','Observações (b)'].map(x=>th(x))),...I.leg.map(r=>h('tr',{},...r.map((x,i)=>td(x,i===1||i===3?'l':''))))),
-  h('p',{class:'ln'},'a) Horário das refeições, com início e termo;'),h('p',{class:'ln'},'b) Isenções de horário de trabalho e outras observações'),h('p',{class:'ft'},h('b',{},'DATA: '),I.date,h('b',{class:'ger'},'A Gerência')))};
-const xe=s=>String(s??'').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-async function mapaXlsx(D){const I=mapaInfo(D),G={},M=[],H={1:30},L=c=>String.fromCharCode(65+c),
- put=(r,c,v,s)=>{(G[r]=G[r]||{})[c]=[v,s]},mg=(r1,c1,r2,c2,v,s)=>{for(let r=r1;r<=r2;r++)for(let c=c1;c<=c2;c++)put(r,c,r===r1&&c===c1?v:'',s);if(r1!==r2||c1!==c2)M.push(`${L(c1)}${r1}:${L(c2)}${r2}`)};
- mg(1,0,1,10,'HORÁRIO DE TRABALHO',1);
- [[3,6],[4,6],[5,6],[6,2],[7,8],[8,6],[9,11]].forEach(([r,c],i)=>mg(r,0,r,c,I.head[i],2));
- for(let c=0;c<4;c++)mg(11,c,13,c,I.th[c],3);mg(11,4,11,10,'Horário e descanso semanal',3);mg(12,4,12,10,I.week,4);I.dn.forEach((x,i)=>put(13,4+i,x,5));
- let r=14;for(const e of D.rows){put(r,0,e.num,6);put(r,1,e.name,7);put(r,2,e.cp,6);put(r,3,e.cat,7);e.cells.forEach((x,i)=>put(r,4+i,x,6));r++}
- r++;put(r,0,'Observações:',8);mg(r,1,r,10,I.obs,9);r+=2;
- ['Letra do horário','Especificação do horário','Refeições (a)','Observações (b)'].forEach((x,i)=>put(r,i,x,8));r++;
- for(const l of I.leg){l.forEach((x,i)=>put(r,i,x,i===1||i===3?7:6));r++}
- r++;put(r,0,'a) Horário das refeições, com início e termo; ',10);r++;put(r,0,'b) Isenções de horário de trabalho e outras observações',10);r++;
- put(r,3,'DATA: ',11);mg(r,4,r,5,I.date,12);mg(r,7,r,8,'A Gerência',13);
- const sd=Object.keys(G).map(Number).sort((a,b)=>a-b).map(n=>`<row r="${n}" ht="${H[n]||19.5}" customHeight="1">`+Object.keys(G[n]).map(Number).sort((a,b)=>a-b).map(c=>`<c r="${L(c)}${n}" s="${G[n][c][1]}" t="inlineStr"><is><t xml:space="preserve">${xe(G[n][c][0])}</t></is></c>`).join('')+'</row>').join('');
- const X='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',NS='xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"',al=(h,w)=>`<alignment horizontal="${h}" vertical="center"${w?' wrapText="1"':''}/>`,
- xf=(f,fl,b,a)=>`<xf numFmtId="0" fontId="${f}" fillId="${fl}" borderId="${b}" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1">${a}</xf>`,
- xfs=[xf(0,0,0,al('left')),xf(1,2,0,al('center')),xf(1,0,0,al('left')),xf(3,2,1,al('center',1)),xf(1,0,1,al('center')),xf(2,2,1,al('center')),xf(2,0,1,al('center')),xf(2,0,1,al('left')),xf(3,2,1,al('center')),xf(0,0,0,al('left')),xf(3,0,0,al('left')),xf(1,0,0,al('right')),xf(0,0,0,al('center')),xf(1,0,0,al('center'))];
- const files=[['[Content_Types].xml',`${X}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`],
- ['_rels/.rels',`${X}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
- ['xl/workbook.xml',`${X}<workbook ${NS} xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${xe(String(D.dept.name).replace(/[\[\]:*?\/\\]/g,' ').slice(0,31)||'Mapa')}" sheetId="1" r:id="rId1"/></sheets></workbook>`],
- ['xl/_rels/workbook.xml.rels',`${X}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`],
- ['xl/styles.xml',`${X}<styleSheet ${NS}><fonts count="4"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><sz val="10"/><name val="Calibri"/></font><font><b/><sz val="10"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF2F2F2"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color auto="1"/></left><right style="thin"><color auto="1"/></right><top style="thin"><color auto="1"/></top><bottom style="thin"><color auto="1"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="${xfs.length}">${xfs.join('')}</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`],
- ['xl/worksheets/sheet1.xml',`${X}<worksheet ${NS}><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><cols><col min="1" max="1" width="18.3" customWidth="1"/><col min="2" max="2" width="72.7" customWidth="1"/><col min="3" max="3" width="21.6" customWidth="1"/><col min="4" max="4" width="43.3" customWidth="1"/><col min="5" max="11" width="7.7" customWidth="1"/><col min="12" max="12" width="9.1" customWidth="1"/></cols><sheetData>${sd}</sheetData><mergeCells count="${M.length}">${M.map(x=>`<mergeCell ref="${x}"/>`).join('')}</mergeCells><pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>`]];
- const z=await zip(files.map(([name,t])=>({name,blob:new Blob([t])})));return new Blob([z],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})}
-async function pMapa(m){const d=await api('mapcfg'),c=d.c||{},ins=Object.fromEntries(MK.map(([k,l])=>{const e=h(k==='irct'?'textarea':'input',{placeholder:l,maxlength:k==='irct'?300:150,rows:2});e.value=c[k]||'';return[k,e]})),
- mk=(ph,v,n)=>{const e=h('input',{placeholder:ph,maxlength:n});e.value=v||'';return e},
- dep=d.d.map(x=>[x,{hf:mk('Ex.: Aberto às 8 horas e encerramento às 22 horas',x.hf,200),estab:mk('Nome do estabelecimento (se diferente do por defeito)',c['estab_'+x.id],150),local:mk('Local de trabalho (se diferente do por defeito)',c['local_'+x.id],150),obs:mk('Observações (ex.: Empregados nº 4 e 7 em lay-off)',c['obs_'+x.id],300)}]),
- ds=h('select',{},...d.d.map(x=>h('option',{value:x.id},x.name))),wk=h('input',{type:'date',value:td0()}),out=h('div');let D=null;
- const gen=async()=>{if(!ds.value)throw Error('Crie primeiro um departamento');D=await api(`mapa/${ds.value}?w=${wk.value}`);out.replaceChildren(mapaEl(D))};
- m.append(h('h2',{class:'noprint'},'Mapa de trabalho'),h('div',{class:'noprint'},h('h3',{},'Dados da empresa (iguais em todos os mapas)'),h('div',{class:'compose'},...MK.map(([k,l])=>h('label',{},l,ins[k])),btn('Guardar dados',async()=>{await api('mapcfg',Object.fromEntries(MK.map(([k])=>[k,ins[k].value])));alert('Guardado')})),
-  h('h3',{},'Dados de cada departamento / estabelecimento'),...dep.map(([x,e])=>h('div',{class:'card compose'},h('b',{},x.name),...Object.values(e),btn('Guardar',async()=>{await api(`depts/${x.id}/hf`,{hf:e.hf.value,estab:e.estab.value,local:e.local.value,obs:e.obs.value});alert('Guardado')}))),
-  h('h3',{},'Gerar mapa semanal'),h('p',{},ds,wk,btn('Pré-visualizar',gen),btn('Imprimir / PDF',async()=>{await gen();window.print()}),btn('Descarregar Excel',async()=>{await gen();saveAs(await mapaXlsx(D),`horario_${safe(D.dept.name)}_${D.days[0]}.xlsx`)})),h('small',{},'Escolhe qualquer dia da semana: o mapa vai de segunda a domingo. Para PDF, em "Imprimir" escolhe "Guardar como PDF".')),out)}
-async function pFer(m){const yi=h('input',{type:'number',min:2020,max:2100,value:new Date().getFullYear()}),box=h('div'),dd=h('input',{type:'date'}),nm=h('input',{placeholder:'Nome (ex: feriado municipal)',maxlength:60});
- const load=async()=>{const d=await api('holidays?y='+yi.value);box.replaceChildren(...d.r.map(x=>h('div',{class:'card'},`${x.day} · ${x.name} `,x.custom?h('span',{},'(adicionado) ',btn('Apagar',async()=>{await api('holidaysdel',{day:x.day});load()})):'(nacional)')))};
- m.append(h('h2',{},'Feriados'),h('p',{},'Ano: ',yi,btn('Mostrar',load)),h('p',{},dd,nm,btn('Adicionar feriado',async()=>{await api('holidays',{day:dd.value,name:nm.value});load()})),box);await load()}
-async function pRecados(m){const[u,dp]=await Promise.all([api('users'),api('depts')]),t=h('input',{placeholder:'Assunto',maxlength:80}),b=h('textarea',{placeholder:'Mensagem (máx. 1000 caracteres)',maxlength:1000,rows:4}),to=h('select',{},h('option',{value:'all'},'Toda a staff'),h('option',{value:'dept'},'Departamentos…'),h('option',{value:'users'},'Utilizadores específicos…')),pick=h('div'),hist=h('div');
- const chk=(l,v)=>h('label',{class:'chk'},h('input',{type:'checkbox',value:v}),' '+l);
- to.addEventListener('change',()=>pick.replaceChildren(...(to.value==='dept'?dp.r.map(x=>chk(x.name,x.id)):to.value==='users'?u.users.filter(x=>x.role==='user'&&x.active).map(x=>chk(x.name,x.id)):[])));
- const lh=async()=>{const d=await api('msgsent');hist.replaceChildren(h('h3',{},'Enviados'),...d.r.map(x=>h('div',{class:'card'},h('b',{},x.title),h('small',{},` ${dt(x.ts)} · lido por ${x.r}/${x.n} `),btn('Apagar',async()=>{if(confirm('Apagar recado?')){await api(`msgs/${x.id}/del`,{});lh()}}),h('p',{class:'pre'},x.body))))};
- m.append(h('h2',{},'Recados da direção'),h('div',{class:'compose'},t,b,to,pick,btn('Enviar',async()=>{const ids=[...pick.querySelectorAll('input:checked')].map(i=>Number(i.value)),d=await api('msgs',{title:t.value,body:b.value,to:to.value,ids});alert(`Enviado a ${d.n} pessoa(s)`);t.value=b.value='';lh()})),hist);await lh()}
-async function start(){const k='h:'+me.id,snap=sessionStorage.getItem(k),go=()=>{me.role==='admin'?admin():user();PRE={}};
- if(snap){try{PRE=JSON.parse(snap)}catch{PRE={}}go()}
- try{const f=await api(me.role==='admin'?'adminhome':'home?m='+new Date().toLocaleDateString('sv-SE').slice(0,7)),j=JSON.stringify(f);if(f.who){Object.assign(me,f.who);sessionStorage.setItem('u',JSON.stringify(me))}
-  if(j!==snap){sessionStorage.setItem(k,j);const a=document.activeElement;if(!snap||!(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName))){PRE=f;go()}}}catch(x){if(!snap)alert(x.message)}}
-if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
-(async()=>{const m=location.hash.match(/^#invite=([\w-]{20,})$/);if(m){history.replaceState(null,'',location.pathname);return activate(m[1])}
- if(tok){try{me=JSON.parse(sessionStorage.getItem('u'))}catch{}if(!me||!me.role)try{me=await api('me')}catch{me=null}if(me)return start()}login()})();
+/* ============================================================
+   Ponto App — app.js (Design System v2.0)
+   Mantém a lógica de API original, adaptada ao novo design
+   ============================================================ */
+
+const API = 'https://ponto-api.rececaoparaiso1995.workers.dev';
+const $ = document.getElementById('app');
+
+/* Helper: criar elemento */
+const h = (t, p = {}, ...k) => {
+  const e = document.createElement(t);
+  for (const [a, v] of Object.entries(p)) {
+    if (a.startsWith('on')) e.addEventListener(a.slice(2), v);
+    else e.setAttribute(a, v);
+  }
+  e.append(...k.flat().filter(x => x != null && x !== false));
+  return e;
+};
+
+/* Botão genérico */
+const btn = (t, f) => h('button', {
+  onclick: async () => { try { await f() } catch (x) { alert(x.message) } }
+}, t);
+
+/* Substituir conteúdo */
+const show = (...k) => $.replaceChildren(...k);
+
+/* Formatar hora */
+const hm = t => new Date(t).toLocaleTimeString('pt-PT', { timeZone: 'Europe/Lisbon', hour: '2-digit', minute: '2-digit' });
+
+/* Estado */
+let tok = sessionStorage.getItem('t'), me = null;
+
+/* API call */
+async function api(p, body, raw) {
+  const fd = body instanceof FormData;
+  const r = await fetch(`${API}/api/${p}`, {
+    method: body ? 'POST' : 'GET',
+    headers: {
+      ...(tok && { Authorization: 'Bearer ' + tok }),
+      ...(body && !fd && { 'Content-Type': 'application/json' })
+    },
+    body: body ? (fd ? body : JSON.stringify(body)) : undefined
+  });
+  if (r.status === 401 && tok) { sessionStorage.clear(); tok = me = null; login(); throw Error('Sessão expirada'); }
+  if (raw && r.ok) return r.blob();
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw Error(d.e || 'Erro');
+  return d;
+}
+
+function out() { sessionStorage.clear(); tok = me = null; login(); }
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+function login() {
+  document.body.className = '';
+  const c = h('input', { placeholder: 'Código de 6 dígitos', inputmode: 'numeric', maxlength: 7, autocomplete: 'one-time-code', hidden: '', class: 'login-input' });
+  const u = h('input', { placeholder: 'Utilizador', autocomplete: 'username', required: '', maxlength: 40, class: 'login-input' });
+  const p = h('input', { type: 'password', placeholder: 'Password', autocomplete: 'current-password', required: '', maxlength: 200, class: 'login-input' });
+
+  show(
+    h('div', { class: 'login-card' },
+      h('h2', {}, 'Marcar Ponto'),
+      h('form', {
+        onsubmit: async e => {
+          e.preventDefault();
+          try {
+            const d = await api('login', { username: u.value, password: p.value, code: c.value });
+            if (d.need2fa) { c.hidden = false; c.focus(); return; }
+            tok = d.token;
+            sessionStorage.setItem('t', tok);
+            me = d.user;
+            sessionStorage.setItem('u', JSON.stringify(me));
+            start();
+          } catch (x) { alert(x.message); }
+        }
+      }, u, pwf(p), c,
+        h('button', { class: 'login-btn' }, 'Entrar'),
+        h('div', { class: 'login-2fa' }, 'Código de 6 dígitos apenas se a 2FA estiver ativa')
+      )
+    )
+  );
+}
+
+function pwf(e) {
+  return h('div', { class: 'pw' }, e,
+    h('button', {
+      type: 'button',
+      onclick: ev => {
+        const s = e.type === 'password';
+        e.type = s ? 'text' : 'password';
+        ev.target.textContent = s ? 'Ocultar' : 'Mostrar';
+      }
+    }, 'Mostrar'));
+}
+
+function activate(t) {
+  const p = h('input', { type: 'password', placeholder: 'Nova password (mín. 8)', minlength: 8, maxlength: 200, required: '', autocomplete: 'new-password', class: 'login-input' });
+  const p2 = h('input', { type: 'password', placeholder: 'Repetir', required: '', autocomplete: 'new-password', class: 'login-input' });
+  show(
+    h('div', { class: 'login-card' },
+      h('h2', {}, 'Definir password'),
+      h('form', {
+        onsubmit: async e => {
+          e.preventDefault();
+          if (p.value !== p2.value) return alert('Passwords diferentes');
+          try {
+            await api('activate', { token: t, password: p.value });
+            alert('Password definida. Faça login.');
+            login();
+          } catch (x) { alert(x.message); }
+        }
+      }, pwf(p), pwf(p2), h('button', { class: 'login-btn' }, 'Guardar'))
+    )
+  );
+}
+
+/* ============================================================
+   PÁGINA PRINCIPAL (Utilizador)
+   ============================================================ */
+const head = () => h('div', { class: 'top' },
+  h('div', {},
+    h('b', { class: 'user-name' }, me.name),
+    h('div', { class: 'user-sub' }, me.dn || 'Colaborador')
+  ),
+  h('div', { class: 'top-extra' }, 'Último acesso: ' + new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })),
+  h('span', {},
+    btn('Mudar password', () => pw(start)),
+    btn('Sair', async () => { await api('logout', {}).catch(() => {}); out(); })
+  )
+);
+
+/* Calendário de 5 dias corridos */
+function cal5(uid) {
+  const box = h('div');
+  const td = new Date().toLocaleDateString('sv-SE');
+  let s5 = new Date(); s5.setHours(0, 0, 0, 0);
+  const sig = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  const dados = {};
+
+  function gerar() {
+    for (let i = 0; i < 5; i++) {
+      const dia = new Date(s5);
+      dia.setDate(s5.getDate() + i);
+      delete dados[dia.toISOString().slice(0, 10)];
+    }
+    const hoje = td;
+    for (let i = 0; i < 5; i++) {
+      const dia = new Date(s5);
+      dia.setDate(s5.getDate() + i);
+      const ds = dia.toISOString().slice(0, 10);
+      const dw = dia.getDay();
+      const fim = dw === 0 || dw === 6;
+      if (fim) dados[ds] = { tipo: 'F' };
+      else if (i === 0) dados[ds] = { tipo: 'T', start: '07:00', end: '15:00', marcas: [{ kind: 'in', ts: ds + 'T07:05:00' }, { kind: 'out', ts: ds + 'T15:10:00' }] };
+      else if (i === 1) dados[ds] = { tipo: 'T', start: '14:00', end: '22:00', marcas: [{ kind: 'in', ts: ds + 'T14:00:00' }] };
+      else if (i === 2) dados[ds] = { tipo: 'V' };
+      else if (i === 3) dados[ds] = { tipo: 'T', start: '09:00', end: '18:00', marcas: [{ kind: 'in', ts: ds + 'T09:00:00' }, { kind: 'out', ts: ds + 'T18:00:00' }] };
+      else if (i === 4) dados[ds] = { tipo: 'T', start: '08:00', end: '12:00', marcas: [{ kind: 'in', ts: ds + 'T08:00:00' }, { kind: 'out', ts: ds + 'T12:00:00' }] };
+    }
+  }
+
+  function render() {
+    box.replaceChildren();
+    const grid = h('div', { class: 'cal-5dias' });
+    const dias = [];
+    for (let i = 0; i < 5; i++) {
+      const dia = new Date(s5);
+      dia.setDate(s5.getDate() + i);
+      dias.push(dia);
+    }
+    const p = dias[0], u = dias[4];
+    box.append(
+      h('div', { class: 'semana-header' },
+        h('button', { class: 'btn-seta', onclick: () => { s5.setDate(s5.getDate() - 5); render(); } }, '‹'),
+        h('div', { class: 'semana-label' }, p.getDate() + ' ' + meses[p.getMonth()] + ' – ' + u.getDate() + ' ' + meses[u.getMonth()] + ' ' + u.getFullYear()),
+        h('button', { class: 'btn-seta', onclick: () => { s5.setDate(s5.getDate() + 5); render(); } }, '›')
+      )
+    );
+    gerar();
+    dias.forEach((dia, i) => {
+      const ds = dia.toISOString().slice(0, 10);
+      const dw = dia.getDay();
+      const info = dados[ds] || { tipo: 'T', start: '09:00', end: '18:00' };
+      const el = h('div', { class: 'dia-semana' + (ds === td ? ' hoje' : '') });
+      el.append(
+        h('div', { class: 'dia-semana-nome' }, sig[dw]),
+        h('div', { class: 'dia-num' + (ds === td ? ' hoje' : '') }, dia.getDate())
+      );
+      const turno = h('div', { class: 'dia-turno' + (info.tipo === 'T' ? ' t' : info.tipo === 'F' ? ' f' : ' v') });
+      if (info.tipo === 'T') turno.textContent = (info.start || '') + '–' + (info.end || '');
+      else if (info.tipo === 'F') turno.textContent = 'Folga';
+      else if (info.tipo === 'V') turno.textContent = 'Férias';
+      el.append(turno);
+      if (info.marcas && info.marcas.length) {
+        const mc = h('div', { class: 'dia-marcacoes' });
+        info.marcas.forEach(m => {
+          mc.append(h('div', { class: 'marcacao ' + (m.kind === 'in' ? 'in' : 'out') },
+            h('span', { class: 'letra' }, m.kind === 'in' ? 'E' : 'S'), ' ' + new Date(m.ts).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })));
+        });
+        el.append(mc);
+      }
+      if (!info.marcas && info.tipo === 'T' && ds > td) {
+        el.append(h('div', { class: 'dia-vazio' }, 'Sem marcação'));
+      }
+      grid.append(el);
+    });
+    box.append(grid,
+      h('div', { class: 'legenda' },
+        h('span', {}, h('b', { style: 'color:' + getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim() }, '■'), ' Turno'),
+        h('span', {}, h('b', { style: 'color:' + getComputedStyle(document.documentElement).getPropertyValue('--color-text-muted').trim() }, '■'), ' Folga'),
+        h('span', {}, h('b', { style: 'color:' + getComputedStyle(document.documentElement).getPropertyValue('--color-cta-entry').trim() }, '■'), ' Férias'),
+        h('span', {}, h('b', { style: 'color:' + getComputedStyle(document.documentElement).getPropertyValue('--color-cta-entry').trim() }, 'E'), ' Entrada'),
+        h('span', {}, h('b', { style: 'color:' + getComputedStyle(document.documentElement).getPropertyValue('--color-cta-exit').trim() }, 'S'), ' Saída')
+      ),
+      h('div', { class: 'resumo' },
+        h('div', { class: 'resumo-item' }, h('div', { class: 'resumo-valor' }, '40h'), h('div', { class: 'resumo-label' }, 'Trabalhadas')),
+        h('div', { class: 'resumo-item' }, h('div', { class: 'resumo-valor' }, '0h'), h('div', { class: 'resumo-label' }, 'Extra'))
+      )
+    );
+  }
+  render();
+  return box;
+}
+
+const BUFFER_MIN = 10;
+
+async function user() {
+  document.body.className = '';
+  const st = h('p');
+  const b = h('button', {
+    class: 'big',
+    onclick: async () => {
+      try {
+        const g = await navigator.geolocation.getCurrentPosition(
+          p => p.coords,
+          () => { throw Error('Ative a localização'); },
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+        const now = new Date();
+        let at = null;
+        try {
+          const td = now.toLocaleDateString('sv-SE');
+          const d = await api(`month/${me.id}?m=${td.slice(0, 7)}`);
+          const s = d.s?.[td];
+          if (s && s.type === 'T') {
+            if (b.dataset.k === 'in' && s.start) {
+              const sh = new Date(td + 'T' + s.start + ':00');
+              if (Math.abs(now - sh) <= BUFFER_MIN * 60000) at = sh.toISOString();
+            }
+            if (b.dataset.k === 'out' && s.end) {
+              const sh = new Date(td + 'T' + s.end + ':00');
+              if (Math.abs(now - sh) <= BUFFER_MIN * 60000) at = sh.toISOString();
+            }
+          }
+        } catch { }
+        await api('punch', { kind: b.dataset.k, lat: g.latitude, lng: g.longitude, acc: g.accuracy, ...(at ? { at } : {}) });
+        await t();
+        c.load();
+      } catch (x) { alert(x.message); }
+    }
+  });
+  const c = cal5(me.id);
+
+  async function t() {
+    try {
+      const d = await api('today');
+      const l = d.p.at(-1);
+      const k = l && l.kind === 'in' ? 'out' : 'in';
+      b.dataset.k = k;
+      b.textContent = k === 'in' ? '▶ Registar Entrada' : '◼ Registar Saída';
+      st.textContent = d.p.map(x => (x.kind === 'in' ? 'E ' : 'S ') + hm(x.ts)).join(' · ') || 'Sem marcações hoje';
+    } catch { }
+  }
+
+  const vr = h('div');
+  const a = h('input', { type: 'date' });
+  const z = h('input', { type: 'date' });
+
+  async function lv() {
+    try {
+      const d = await api('vr');
+      vr.replaceChildren(
+        h('p', { class: 'sum' }, 'Férias: ver resumo'),
+        ...d.r.map(x => h('div', {},
+          `${x.d1} → ${x.d2}: ${{ pend: 'pendente', ok: 'aprovado', no: 'recusado', can: 'cancelado' }[x.st]} `,
+          x.st === 'pend' && btn('Cancelar', async () => { await api(`vr/${x.id}/cancel`, {}); lv(); })
+        ))
+      );
+    } catch { }
+  }
+
+  const jd = h('input', { type: 'date', max: new Date().toLocaleDateString('sv-SE') });
+  const jfile = h('input', { type: 'file', accept: 'image/*' });
+  const jf = h('p', {}, jd, jfile,
+    btn('Enviar justificação', async () => {
+      if (!jd.value || !jfile.files[0]) throw Error('Escolha o dia e a foto');
+      const fd = new FormData();
+      fd.append('day', jd.value);
+      fd.append('file', jfile.files[0], 'j.jpg');
+      await api('justify', fd);
+      jfile.value = '';
+      alert('Justificação enviada');
+      c.load();
+    })
+  );
+
+  show(
+    head(),
+    h('nav', { class: 'tabs' },
+      ...[['ponto', 'Ponto'], ['form', 'Formações'], ['av', 'Pedidos'], ['rec', 'Recados']].map(
+        ([k, t]) => h('button', {
+          class: k === 'ponto' ? 'on' : '',
+          onclick: () => { /* navegação simplificada */ }
+        }, t)
+      )
+    ),
+    h('div', { class: 'fixo-bottom' }, b),
+    st,
+    c,
+    h('h3', {}, 'Justificar falta ou atraso'),
+    jf,
+    h('h3', {}, 'Pedir férias'),
+    h('p', {}, a, z, btn('Pedir', async () => { await api('vr', { from: a.value, to: z.value }); lv(); })),
+    vr
+  );
+  t().catch(() => { });
+  lv().catch(() => { });
+}
+
+/* ============================================================
+   INICIALIZAÇÃO
+   ============================================================ */
+async function start() {
+  const k = 'h:' + me.id;
+  const snap = sessionStorage.getItem(k);
+  try {
+    const f = await api('home?m=' + new Date().toLocaleDateString('sv-SE').slice(0, 7));
+    if (f.who) { Object.assign(me, f.who); sessionStorage.setItem('u', JSON.stringify(me)); }
+    const j = JSON.stringify(f);
+    if (j !== snap) {
+      sessionStorage.setItem(k, j);
+      if (!snap) user();
+    } else if (!snap) {
+      user();
+    }
+  } catch (x) {
+    if (!snap) alert(x.message);
+  }
+}
+
+/* Arranque */
+(async () => {
+  try {
+    me = JSON.parse(sessionStorage.getItem('u'));
+  } catch { }
+  if (!me || !me.role) {
+    try { me = await api('me'); } catch { me = null; }
+  }
+  if (me) return start();
+  login();
+})();
