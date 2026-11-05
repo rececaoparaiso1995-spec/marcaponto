@@ -2,7 +2,11 @@
    MARCA PONTO — Design System aplicado (tokens de DESIGN_SYSTEM.md)
    Apenas design: cores, tipografia, espaçamento, raios, sombras.
    Nenhuma função, layout ou botão foi alterado.
+   Ficheiro fora da pasta "versao estavel".
    ================================================================ */
+
+/* ---------- Fontes do Design System ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 /* ---------- Tokens de design (Design System v2.0) ---------- */
 :root {
@@ -43,9 +47,11 @@
   --touch-target: 2.75rem;
 
   --header-height: 64px;
+  --nav-width: 260px;
+  --transition: 150ms ease;
 }
 
-/* ---------- Modo escuro (opcional, conforme design system) ---------- */
+/* ---------- Modo escuro ---------- */
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --color-primary: #3B82F6;
@@ -79,9 +85,6 @@
   --color-warning: #F59E0B;
 }
 
-/* ---------- Importação de fontes do design system ---------- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
 /* ---------- Reset base ---------- */
 * {
   box-sizing: border-box;
@@ -100,10 +103,10 @@ body {
   background: var(--color-background);
   min-height: 100dvh;
   padding: 0;
+  padding-bottom: 96px;
   max-width: none;
   margin: 0;
   -webkit-font-smoothing: antialiased;
-  padding-bottom: 96px; /* espaço para botão fixo fundo (design system) */
   overflow-x: hidden;
 }
 
@@ -147,19 +150,33 @@ body {
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-/* ---------- Botões (design system) ---------- */
+/* ---------- Botões (Design System) ---------- */
 button {
   font: inherit;
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   min-height: var(--touch-target);
 }
 button:active { transform: scale(0.97); }
 button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+
+/* Botão padrão secundário (fundo branco, texto escuro) */
+button:not(.btn):not(.big):not(.btn-ghost):not(.btn-danger):not(.btn-sm):not(.btn-lg) {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  padding: 0.8rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+button:not(.btn):not(.big):not(.btn-ghost):not(.btn-danger):not(.btn-sm):not(.btn-lg):hover {
+  background: var(--color-text-muted);
+  color: #fff;
+}
 
 .btn {
   display: inline-flex;
@@ -184,30 +201,17 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 .btn-ghost:hover { background: var(--color-surface); color: var(--color-text); border-color: var(--color-border-hover); }
 
 .btn-danger {
-  background: #fee2e2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  background: var(--color-cta-exit);
+  color: #fff;
+  border: 1px solid var(--color-cta-exit);
 }
-.btn-danger:hover { background: #fecaca; }
+.btn-danger:hover { background: #b91c1c; border-color: #b91c1c; }
 
 .btn-sm { padding: 0.4rem 0.75rem; font-size: 0.85rem; }
 .btn-lg { padding: 0.8rem 1.5rem; font-size: 1rem; }
 .btn-block { width: 100%; }
 
-/* Botão fixo Entrada / Saída (design system secção 3.3) */
-.big {
-  font-size: 1.15rem;
-  padding: 1.1rem 1.5rem;
-  border-radius: var(--radius-lg);
-  background: var(--color-brand, var(--color-primary));
-  color: #fff;
-  border: none;
-  min-height: 3.25rem;
-  max-width: 340px;
-}
-.big:hover { background: var(--color-brand-hover, var(--color-primary-hover)); }
-
-/* Estados CTA (entrada verde, saída vermelha, pausa laranja) */
+/* CTA Entrada / Saída / Pausa (Design System secção 3.3) */
 .cta-entry { background: var(--color-cta-entry); color: #fff; border-color: var(--color-cta-entry); }
 .cta-entry:hover { background: #047857; border-color: #047857; }
 .cta-exit { background: var(--color-cta-exit); color: #fff; border-color: var(--color-cta-exit); }
@@ -215,7 +219,20 @@ button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 
 .cta-pause { background: var(--color-cta-pause); color: #fff; border-color: var(--color-cta-pause); }
 .cta-pause:hover { background: #b45309; border-color: #b45309; }
 
-/* ---------- Inputs e formulários (design system secção 5.3) ---------- */
+/* Botão fixo Entrada / Saída (Design System secção 3.3) */
+.big {
+  font-size: 1.15rem;
+  padding: 1.1rem 1.5rem;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  min-height: 3.25rem;
+  max-width: 340px;
+}
+.big:hover { background: var(--color-primary-hover); }
+
+/* ---------- Inputs e formulários (Design System secção 5.3) ---------- */
 input, select, textarea {
   font: inherit;
   width: 100%;
@@ -224,7 +241,7 @@ input, select, textarea {
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text);
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
 input:focus, select:focus, textarea:focus {
   outline: none;
@@ -249,7 +266,7 @@ label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); ma
   margin: 12px 0;
 }
 
-/* ---------- Cabeçalho / Top bar (design system secção 3.1) ---------- */
+/* ---------- Cabeçalho / Top bar (Design System secção 3.1) ---------- */
 .top {
   display: flex;
   justify-content: space-between;
@@ -267,7 +284,7 @@ label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); ma
 .top b { font-size: 1.1rem; font-weight: 700; color: var(--color-text); }
 .top > span { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 
-/* ---------- Navegação por abas (design system secção 3.1) ---------- */
+/* ---------- Navegação por abas (Design System secção 3.1) ---------- */
 .tabs {
   display: flex;
   gap: 0.5rem;
@@ -295,11 +312,26 @@ label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); ma
   background: rgb(30 64 175 / 0.04);
 }
 
-/* ---------- Layout Admin (design system secção 4.2) ---------- */
+/* ---------- Botão fixo fundo (Design System secção 3.1) ---------- */
+.fixo-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
+  background: var(--color-background);
+  border-top: 1px solid var(--color-border);
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+/* ---------- Layout Admin (Design System secção 4.2) ---------- */
 body.wide { max-width: none; padding: 0; }
 .adm {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: var(--nav-width) 1fr;
   gap: 0;
   height: calc(100vh - var(--header-height));
   min-height: 0;
@@ -325,7 +357,7 @@ body.wide { max-width: none; padding: 0; }
   background: transparent;
   border: none;
   border-left: 3px solid transparent;
-  transition: all 150ms ease;
+  transition: all var(--transition);
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -342,7 +374,7 @@ body.wide { max-width: none; padding: 0; }
   min-width: 0;
 }
 
-/* ---------- Cards (design system secção 5.1) ---------- */
+/* ---------- Cards (Design System secção 5.1) ---------- */
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -353,7 +385,7 @@ body.wide { max-width: none; padding: 0; }
 }
 .card h3, .card h4 { margin-bottom: 0.75rem; font-weight: 700; color: var(--color-text); }
 
-/* ---------- Calendário / grade de dias ---------- */
+/* ---------- Calendário / grade de dias (7 dias — admin) ---------- */
 .g {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -375,7 +407,7 @@ body.wide { max-width: none; padding: 0; }
   font-size: 0.85rem;
   overflow: hidden;
   background: var(--color-surface);
-  transition: all 150ms ease;
+  transition: all var(--transition);
   position: relative;
 }
 .d:hover { border-color: var(--color-primary); box-shadow: var(--shadow-sm); }
@@ -392,7 +424,7 @@ body.wide { max-width: none; padding: 0; }
   z-index: -1;
 }
 
-/* Cores dos tipos de dia (design system) */
+/* Cores dos tipos de dia (Design System) */
 .T { background: #dcfce7; color: #166534; }
 .F { background: #f1f5f9; color: var(--color-text-muted); }
 .V { background: #dbeafe; color: #1e40af; }
@@ -404,7 +436,81 @@ body.wide { max-width: none; padding: 0; }
 .H { border: 2px solid var(--color-primary); background: rgb(239 246 255); }
 .hol { font-weight: 700; color: var(--color-primary-hover); }
 
-/* ---------- Tabelas (design system secção 5.2) ---------- */
+/* ---------- Vista de 5 dias corridos (utilizador — Design System secção 3.4) ---------- */
+.cal-5dias {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 3px;
+}
+.dia-semana {
+  min-height: 150px;
+  padding: 10px 4px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dia-num { font-size: 1.125rem; font-weight: 700; color: var(--color-text); }
+.dia-semana-nome { font-size: 0.6875rem; text-transform: uppercase; color: var(--color-text-muted); }
+.dia-turno {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+.dia-turno.t { color: var(--color-primary); }
+.dia-turno.f { color: var(--color-text-muted); }
+.dia-turno.v { color: var(--color-cta-entry); }
+.marcacao.in {
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--color-cta-entry);
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 1px 5px;
+  border-radius: var(--radius-full);
+  display: inline-block;
+}
+.marcacao.out {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--color-cta-exit);
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 1px 5px;
+  border-radius: var(--radius-full);
+  display: inline-block;
+}
+
+/* ---------- Vista de 7 dias compacta (admin — Design System secção 4.3) ---------- */
+.cal-7dias {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.dia-compacto {
+  min-height: 85px;
+  padding: 5px 2px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dia-num-compacto { font-size: 0.9rem; font-weight: 700; color: var(--color-text); }
+.dia-nome-compacto { font-size: 0.6rem; text-transform: uppercase; color: var(--color-text-muted); }
+.dia-turno-compacto {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+}
+.marcacao-compacta {
+  font-size: 0.6rem;
+  padding: 1px 5px;
+  border-radius: var(--radius-full);
+  display: inline-block;
+  font-weight: 600;
+}
+
+/* ---------- Tabelas (Design System secção 5.2) ---------- */
 table { width: 100%; border-collapse: collapse; }
 table.tb, table.mapa { border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
 table.tb th, table.tb td, table.mapa th, table.mapa td {
@@ -429,8 +535,6 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
 }
 
 /* ---------- Estados específicos ---------- */
-.big { font-size: 1.15rem; padding: 1.1rem 1.5rem; border-radius: var(--radius-md); background: var(--color-primary); color: #fff; border: none; }
-.big:hover { background: var(--color-primary-hover); }
 .sum { font-weight: 700; color: var(--color-primary-hover); }
 .pre { white-space: pre-wrap; margin: 0.4rem 0; font-size: 0.9rem; line-height: 1.5; }
 .ph {
@@ -448,7 +552,7 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
 }
 .sc { overflow-x: auto; margin: 0.75rem 0; -webkit-overflow-scrolling: touch; }
 
-/* ---------- Compose / formulários longos (design system secção 5.3) ---------- */
+/* ---------- Compose / formulários longos (Design System secção 5.3) ---------- */
 .compose { display: grid; gap: 1.25rem; max-width: 560px; }
 .compose textarea { font: inherit; padding: 0.8rem; }
 .chk { display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; margin: 0.9rem 0; cursor: pointer; }
@@ -467,13 +571,14 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
 .mapa .ger { margin-left: auto; }
 
 @media print {
-  .top, .side, .noprint, .tabs, button, .sc, .compose button { display: none !important; }
-  body { background: #fff; padding: 0; max-width: none; }
+  .top, .side, .noprint, .tabs, button, .sc, .compose button, .fixo-bottom { display: none !important; }
+  body { background: #fff; padding: 0; max-width: none; padding-bottom: 0; }
   .adm { display: block; }
   .mapa .sc { overflow: visible; }
   .mapa h2 { margin: 0; }
-  table.tb th, table.tb td { white-space: normal; font-size: 10px; padding: 3px 5px; }
-  @page { size: A4 landscape; margin: 8mm; }
+  table.tb th, table.tb td { white-space: normal; font-size: 10px; padding: 3px 5px; border: 1px solid #000; }
+  .card { border: 1px solid #000; box-shadow: none; }
+  @page { size: A4; margin: 12mm; -webkit-print-color-adjust: exact; }
 }
 
 /* ---------- Utilitários de largura ---------- */
@@ -489,15 +594,15 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
 }
 @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-/* ---------- Relógio / horas em monospace (design system secção 2) ---------- */
+/* ---------- Relógio / horas em monospace (Design System secção 2) ---------- */
 .mono, time, .hora, .duracao {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
-/* ---------- Responsividade (breakpoints do design system) ---------- */
+/* ---------- Responsividade (breakpoints do Design System) ---------- */
 
-/* Até 375 px — layout compacto */
+/* Até 375 px — Layout compacto, fontes reduzidas, padding menor */
 @media (max-width: 375px) {
   .top { padding: 0 1rem; height: auto; flex-direction: column; align-items: stretch; gap: 0.75rem; }
   .top > span { justify-content: center; width: 100%; }
@@ -508,18 +613,21 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
   .btn { width: 100%; }
   .d { min-height: 72px; font-size: 0.75rem; padding: 0.55rem; }
   .g > b { font-size: 0.7rem; padding: 0.4rem 0; }
+  .cal-5dias .dia-semana { min-height: 120px; padding: 6px 2px; }
+  .dia-num { font-size: 1rem; }
 }
 
-/* 376–480 px — intermédio */
+/* 376–480 px — Intermédio */
 @media (min-width: 376px) and (max-width: 480px) {
   .main { padding: 1.25rem; }
   .form-card { padding: 1.25rem; }
   .d { min-height: 85px; font-size: 0.8rem; padding: 0.65rem; }
+  .cal-5dias .dia-semana { min-height: 135px; padding: 8px 3px; }
 }
 
-/* Acima de 481 px — Desktop */
+/* Acima de 481 px — Desktop: header em linha, mais espaço, inputs lado a lado */
 @media (min-width: 481px) {
-  .adm { grid-template-columns: 260px 1fr; }
+  .adm { grid-template-columns: var(--nav-width) 1fr; }
   .side { position: sticky; top: var(--header-height); height: calc(100vh - var(--header-height)); overflow-y: auto; }
   .tabs { overflow-x: visible; }
   .form-row { grid-template-columns: 1fr 1fr; }
@@ -536,7 +644,7 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
 
 /* Desktop */
 @media (min-width: 1024px) {
-  .adm { grid-template-columns: 260px 1fr; }
+  .adm { grid-template-columns: var(--nav-width) 1fr; }
   .side { position: sticky; top: var(--header-height); height: calc(100vh - var(--header-height)); overflow-y: auto; }
   .tabs { overflow-x: visible; }
 }
