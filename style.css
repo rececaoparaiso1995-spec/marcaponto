@@ -1,59 +1,60 @@
 /* ================================================================
    MARCA PONTO — Design System aplicado (DESIGN_SYSTEM.md v2.0)
    APENAS DESIGN: cores, arredondamentos, sombras, tipografia.
-   Layout e estrutura inalterados (classes do app.js preservadas).
+   Layout e estrutura HTML inalterados (classes do app.js preservadas).
    Ficheiro fora da pasta "versao estavel".
    ================================================================ */
 
-/* ---------- Fontes do Design System ---------- */
+/* ---------- Fontes do Design System (secção 2: Inter + JetBrains Mono) ---------- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
-/* ---------- Tokens de cor (Design System secção 2) ---------- */
+/* ================================================================
+   TOKENS DE DESIGN — Design System secção 2
+   ================================================================ */
 :root {
   /* Cores — Light */
-  --color-primary: #1E40AF;
-  --color-primary-hover: #1E3A8A;
-  --color-cta-entry: #059669;
-  --color-cta-exit: #DC2626;
-  --color-cta-pause: #D97706;
-  --color-background: #FFFFFF;
-  --color-surface: #F8FAFC;
-  --color-text: #0F172A;
-  --color-text-muted: #64748B;
-  --color-border: #E2E8F0;
-  --color-success: #059669;
-  --color-error: #DC2626;
-  --color-warning: #D97706;
+  --color-primary: #1E40AF;        /* Botão principal, cabeçalho, destaques */
+  --color-primary-hover: #1E3A8A;  /* Hover do primário */
+  --color-cta-entry: #059669;      /* Botão "Registar Entrada" */
+  --color-cta-exit: #DC2626;       /* Botão "Registar Saída" */
+  --color-cta-pause: #D97706;      /* Botão "Pausa" / "Retomar" */
+  --color-background: #FFFFFF;     /* Fundo da página */
+  --color-surface: #F8FAFC;        /* Cards, painéis elevados */
+  --color-text: #0F172A;           /* Texto principal */
+  --color-text-muted: #64748B;     /* Texto secundário, helper text */
+  --color-border: #E2E8F0;         /* Bordas, divisórias */
+  --color-border-hover: #CBD5E1;
+  --color-success: #059669;        /* Confirmações */
+  --color-error: #DC2626;          /* Erros, estados inválidos */
+  --color-warning: #D97706;        /* Alertas, atrasos */
 
   /* Tipografia */
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
   /* Espaçamento */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
+  --space-1: 0.25rem;  /* 4px  — padding interno pequeno */
+  --space-2: 0.5rem;   /* 8px  — gap entre elementos */
+  --space-3: 0.75rem;  /* 12px — padding médio */
+  --space-4: 1rem;     /* 16px — padding padrão */
+  --space-5: 1.25rem;  /* 20px — padding generoso */
+  --space-6: 1.5rem;   /* 24px — padding de secção */
 
-  /* Raio (arredondamentos) */
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-full: 9999px;
-
-  /* Sombra */
+  /* Raio e sombra */
+  --radius-md: 0.5rem;    /* 8px */
+  --radius-lg: 0.75rem;   /* 12px */
+  --radius-full: 9999px;  /* píldora / badge */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 
   /* Touch target mínimo mobile */
-  --touch-target: 2.75rem;
+  --touch-target: 2.75rem; /* 44px */
 
   --header-height: 64px;
   --nav-width: 260px;
   --transition: 150ms ease;
 }
 
-/* ---------- Modo escuro (Design System secção 2) ---------- */
+/* ---------- Modo escuro — Design System secção 2 ---------- */
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --color-primary: #3B82F6;
@@ -66,6 +67,7 @@
     --color-text: #F8FAFC;
     --color-text-muted: #94A3B8;
     --color-border: #334155;
+    --color-border-hover: #475569;
     --color-success: #10B981;
     --color-error: #EF4444;
     --color-warning: #F59E0B;
@@ -82,12 +84,15 @@
   --color-text: #F8FAFC;
   --color-text-muted: #94A3B8;
   --color-border: #334155;
+  --color-border-hover: #475569;
   --color-success: #10B981;
   --color-error: #EF4444;
   --color-warning: #F59E0B;
 }
 
-/* ---------- Reset base (layout inalterado) ---------- */
+/* ================================================================
+   RESET BASE
+   ================================================================ */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -103,16 +108,36 @@ body {
   font: 16px/1.5 var(--font-sans);
   color: var(--color-text);
   background: var(--color-background);
-  min-height: 100dvh;
+  min-height: 100vh;
   padding: 0;
-  padding-bottom: 96px; /* espaço botão fixo fundo (Design System secção 3.2) */
   max-width: none;
   margin: 0;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
 }
 
-/* ---------- Utilitários (layout inalterado) ---------- */
+/* ---------- Tipografia de headings (Inter 600–700, secção 2) ---------- */
+h1, h2, h3, h4 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: var(--space-4) 0 var(--space-2);
+  line-height: 1.25;
+}
+h1 { font-size: 1.25rem; }
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1.125rem; }
+h4 { font-size: 1rem; font-weight: 600; }
+h1:first-child, h2:first-child, h3:first-child, h4:first-child { margin-top: 0; }
+
+/* ---------- Números de horas/durações em monospace (secção 7) ---------- */
+.mono, time, .hora, .duracao {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================================================================
+   UTILITÁRIOS (layout inalterado)
+   ================================================================ */
 .hidden, [hidden] { display: none !important; }
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -148,47 +173,45 @@ body {
 .overflow-auto { overflow: auto; }
 .relative { position: relative; }
 
-/* ---------- Scrollbar discreto (layout inalterado) ---------- */
+/* ---------- Scrollbar discreto ---------- */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+::-webkit-scrollbar-thumb { background: var(--color-border-hover); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
 
-/* ---------- Botões — Design System (apenas aparência) ---------- */
-/* button padrão: fundo branco/superfície, texto escuro (secção 5.4) */
+/* ================================================================
+   BOTÕES — Design System secção 5.4
+   button (padrão)  → fundo branco/superfície, texto escuro (secundário)
+   button.primary   → --color-primary / branco (ação principal)
+   button.danger    → --color-cta-exit / branco (apagar)
+   button.success   → --color-cta-entry / branco (criar/confirmar)
+   ================================================================ */
 button {
   font: inherit;
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  min-height: var(--touch-target);
-}
-button:active { transform: scale(0.97); }
-button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; }
-
-/* Botão secundário padrão (fundo superfície, texto escuro) */
-button:not(.btn):not(.big):not(.btn-ghost):not(.btn-danger):not(.btn-sm):not(.btn-lg) {
+  font-size: 0.9rem;
+  font-weight: 500;
   background: var(--color-surface);
   color: var(--color-text);
   border: 1px solid var(--color-border);
-  padding: 0.8rem 1.25rem;
-  font-size: 0.95rem;
-  font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  padding: 0.55rem var(--space-4);
+  min-height: var(--touch-target);
+  transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
-button:not(.btn):not(.big):not(.btn-ghost):not(.btn-danger):not(.btn-sm):not(.btn-lg):hover {
-  background: var(--color-text-muted);
-  color: #fff;
-}
+button:hover { border-color: var(--color-primary); color: var(--color-primary); }
+button:active { transform: scale(0.97); }
+button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* button.primary — Design System secção 5.4 */
+/* Botão primário (secção 5.4) */
 button.primary, .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   padding: 0.8rem 1.25rem;
   font-size: 0.95rem;
   font-weight: 500;
@@ -197,50 +220,69 @@ button.primary, .btn {
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-md);
 }
-button.primary:hover, .btn:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+button.primary:hover, .btn:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  color: #fff;
+}
 button.primary:active, .btn:active { transform: scale(0.98); }
 
-/* button.danger — Design System secção 5.4 */
+/* Botão danger — apagar / excluir (secção 5.4) */
 button.danger, .btn-danger {
   background: var(--color-cta-exit);
   color: #fff;
   border: 1px solid var(--color-cta-exit);
   border-radius: var(--radius-md);
 }
-button.danger:hover, .btn-danger:hover { background: #b91c1c; border-color: #b91c1c; }
+button.danger:hover, .btn-danger:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  color: #fff;
+}
 
-/* button.success — Design System secção 5.4 */
+/* Botão success — criar / confirmar (secção 5.4) */
 button.success, .btn-success {
   background: var(--color-cta-entry);
   color: #fff;
   border: 1px solid var(--color-cta-entry);
   border-radius: var(--radius-md);
 }
-button.success:hover, .btn-success:hover { background: #047857; border-color: #047857; }
+button.success:hover, .btn-success:hover {
+  background: #047857;
+  border-color: #047857;
+  color: #fff;
+}
 
+/* Ghost */
 .btn-ghost {
   background: transparent;
   color: var(--color-text-muted);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
 }
-.btn-ghost:hover { background: var(--color-surface); color: var(--color-text); border-color: var(--color-border-hover); }
+.btn-ghost:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border-hover);
+}
 
+/* Tamanhos */
 .btn-sm { padding: 0.4rem 0.75rem; font-size: 0.85rem; border-radius: var(--radius-md); }
 .btn-lg { padding: 0.8rem 1.5rem; font-size: 1rem; border-radius: var(--radius-md); }
 .btn-block { width: 100%; }
 
-/* CTA Entrada / Saída / Pausa (Design System secção 3.3) */
+/* CTA Entrada / Saída / Pausa (secção 3.3) */
 .cta-entry { background: var(--color-cta-entry); color: #fff; border-color: var(--color-cta-entry); border-radius: var(--radius-md); }
-.cta-entry:hover { background: #047857; border-color: #047857; }
+.cta-entry:hover { background: #047857; border-color: #047857; color: #fff; }
 .cta-exit { background: var(--color-cta-exit); color: #fff; border-color: var(--color-cta-exit); border-radius: var(--radius-md); }
-.cta-exit:hover { background: #b91c1c; border-color: #b91c1c; }
+.cta-exit:hover { background: #b91c1c; border-color: #b91c1c; color: #fff; }
 .cta-pause { background: var(--color-cta-pause); color: #fff; border-color: var(--color-cta-pause); border-radius: var(--radius-md); }
-.cta-pause:hover { background: #b45309; border-color: #b45309; }
+.cta-pause:hover { background: #b45309; border-color: #b45309; color: #fff; }
 
-/* Botão fixo Entrada / Saída (Design System secção 3.3) */
+/* Botão fixo Entrada / Saída (secção 3.3: min-height 3.25rem, max-width 340px, radius-lg) */
 .big {
   font-size: 1.15rem;
+  font-weight: 600;
   padding: 1.1rem 1.5rem;
   border-radius: var(--radius-lg);
   background: var(--color-primary);
@@ -248,11 +290,29 @@ button.success:hover, .btn-success:hover { background: #047857; border-color: #0
   border: none;
   min-height: 3.25rem;
   max-width: 340px;
+  width: 100%;
 }
-.big:hover { background: var(--color-primary-hover); }
+.big:hover { background: var(--color-primary-hover); color: #fff; }
 
-/* ---------- Inputs e formulários — Design System (apenas aparência) ---------- */
-/* secção 5.3: width: 100%, padding: 8px 10px, border-radius: var(--radius-md), foco com anel --color-primary */
+/* Botão fixo fundo (secção 3.2) */
+.fixo-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
+  background: var(--color-background);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-4);
+  display: flex;
+  justify-content: center;
+}
+
+/* ================================================================
+   INPUTS E FORMULÁRIOS — Design System secção 5.3
+   width 100%, padding 8px 10px, radius-md, foco com anel primário
+   ================================================================ */
 input, select, textarea {
   font: inherit;
   width: 100%;
@@ -271,22 +331,33 @@ input:focus, select:focus, textarea:focus {
 input::placeholder { color: var(--color-text-muted); }
 
 textarea { resize: vertical; min-height: 90px; font-family: inherit; }
-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 0.9rem center; background-size: 1rem; padding-right: 2.5rem; }
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  background-size: 1rem;
+  padding-right: 2.5rem;
+}
 
 label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); margin-bottom: 0.7rem; display: block; }
-.form-group { margin-bottom: 1.5rem; }
+.form-group { margin-bottom: var(--space-6); }
 .form-row { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
 
 .form-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: 1.5rem;
+  padding: var(--space-6);
   box-shadow: var(--shadow-sm);
-  margin: 1rem 0;
+  margin: var(--space-4) 0;
 }
 
-/* ---------- Cabeçalho / Top bar (Design System secção 3.1) ---------- */
+/* ================================================================
+   CABEÇALHO / TOP BAR — Design System secção 3.1
+   Fixo no topo, border-bottom, background --color-background
+   ================================================================ */
 .top {
   display: flex;
   justify-content: space-between;
@@ -302,12 +373,15 @@ label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); ma
   flex-wrap: wrap;
 }
 .top b { font-size: 1.1rem; font-weight: 700; color: var(--color-text); }
-.top > span { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.top > span { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
 
-/* ---------- Navegação por abas (Design System secção 3.1) ---------- */
+/* ================================================================
+   NAVEGAÇÃO POR ABAS — Design System secção 3.1
+   Scroll horizontal em ecrãs pequenos, background --color-surface
+   ================================================================ */
 .tabs {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-2);
   margin: 0;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
@@ -316,17 +390,18 @@ label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); ma
 }
 .tabs button {
   flex: 1 1 auto;
-  padding: 1rem 1rem;
+  padding: var(--space-4) var(--space-4);
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-text-muted);
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  white-space: nowrap;
   border-radius: 0;
+  white-space: nowrap;
+  min-height: auto;
 }
-.tabs button:hover { color: var(--color-primary); background: var(--color-surface); }
+.tabs button:hover { color: var(--color-primary); background: transparent; border-bottom-color: transparent; }
 .tabs button.on,
 .tabs button.active {
   color: var(--color-primary);
@@ -334,23 +409,29 @@ label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); ma
   background: rgb(30 64 175 / 0.04);
 }
 
-/* ---------- Botão fixo fundo (Design System secção 3.2) ---------- */
-.fixo-bottom {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  z-index: 1000;
-  background: var(--color-background);
-  border-top: 1px solid var(--color-border);
-  padding: 1rem;
+/* ================================================================
+   NAVEGAÇÃO DE MÊS / SETAS (classe .nav do app.js)
+   ================================================================ */
+.nav {
   display: flex;
+  align-items: center;
   justify-content: center;
+  gap: var(--space-3);
+  margin: var(--space-2) 0;
 }
+.nav b {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  min-width: 8ch;
+  text-align: center;
+}
+.nav button { min-height: auto; padding: 0.35rem 0.7rem; }
 
-/* ---------- Layout Admin (Design System secção 4.2) ---------- */
-/* Sem sidebar lateral, sem botão fixo fundo — layout mantido, apenas cores */
+/* ================================================================
+   LAYOUT ADMIN — Design System secção 4.2
+   ================================================================ */
 body.wide { max-width: none; padding: 0; }
 .adm {
   display: grid;
@@ -373,20 +454,21 @@ body.wide { max-width: none; padding: 0; }
 .side button {
   width: 100%;
   text-align: left;
-  padding: 1rem 1.5rem;
+  padding: var(--space-4) var(--space-6);
   font-size: 0.95rem;
   font-weight: 500;
   color: var(--color-text-muted);
   background: transparent;
   border: none;
   border-left: 3px solid transparent;
+  border-radius: 0;
+  min-height: auto;
   transition: all var(--transition);
   display: flex;
   align-items: center;
-  gap: 1rem;
-  border-radius: 0;
+  gap: var(--space-4);
 }
-.side button:hover { background: var(--color-surface); color: var(--color-text); }
+.side button:hover { background: var(--color-surface); color: var(--color-text); border-left-color: transparent; }
 .side button.on {
   background: rgb(30 64 175 / 0.06);
   color: var(--color-primary);
@@ -394,40 +476,48 @@ body.wide { max-width: none; padding: 0; }
 }
 .main {
   overflow-y: auto;
-  padding: 2rem;
+  padding: var(--space-6);
   min-width: 0;
 }
 
-/* ---------- Cards — Design System secção 5.1 ---------- */
+/* ================================================================
+   CARDS — Design System secção 5.1
+   surface, border, radius-lg, padding 16px, shadow-sm, margin 12px 0
+   ================================================================ */
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: 16px;
-  margin: 12px 0;
+  padding: var(--space-4);
+  margin: var(--space-3) 0;
   box-shadow: var(--shadow-sm);
 }
-.card h3, .card h4 { margin-bottom: 0.75rem; font-weight: 700; color: var(--color-text); }
+.card h3, .card h4 { margin-bottom: var(--space-3); font-weight: 700; color: var(--color-text); }
 
-/* ---------- Calendário / grade de dias (layout inalterado, apenas cores/raios) ---------- */
+/* ================================================================
+   CALENDÁRIO / GRADE DE DIAS (layout inalterado, apenas design)
+   ================================================================ */
 .g {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 10px;
-  margin: 0.75rem 0;
+  margin: var(--space-3) 0;
 }
 .g > b {
   text-align: center;
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--color-text-muted);
-  padding: 0.5rem 0;
+  padding: var(--space-2) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
+.g i { display: block; }
 .d {
   min-height: 100px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 0.75rem;
+  padding: var(--space-3);
   font-size: 0.85rem;
   overflow: hidden;
   background: var(--color-surface);
@@ -435,8 +525,13 @@ body.wide { max-width: none; padding: 0; }
   position: relative;
 }
 .d:hover { border-color: var(--color-primary); box-shadow: var(--shadow-sm); }
-.d.now { outline: 2px solid var(--color-primary); outline-offset: -2px; z-index: 2; background: rgb(239 246 255); }
-.d small { display: block; margin-top: 0.5rem; line-height: 1.6; }
+.d.now {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+  z-index: 2;
+  background: rgb(239 246 255);
+}
+.d small { display: block; margin-top: var(--space-2); line-height: 1.6; }
 .d .now { position: relative; }
 .d .now::after {
   content: "";
@@ -447,8 +542,9 @@ body.wide { max-width: none; padding: 0; }
   pointer-events: none;
   z-index: -1;
 }
+.d.dd { cursor: pointer; }
 
-/* Cores dos tipos de dia (Design System) */
+/* Cores dos tipos de dia — design system (t = primary, f = muted, v = cta-entry) */
 .T { background: #dcfce7; color: #166534; border-radius: var(--radius-md); }
 .F { background: #f1f5f9; color: var(--color-text-muted); border-radius: var(--radius-md); }
 .V { background: #dbeafe; color: #1e40af; border-radius: var(--radius-md); }
@@ -456,11 +552,17 @@ body.wide { max-width: none; padding: 0; }
 .J { background: #fef3c7; color: #92400e; border-radius: var(--radius-md); }
 .L { background: #ffe8cc; color: #92400e; border-radius: var(--radius-md); }
 
-/* Estado de feriado / falta */
+/* Estado de feriado */
 .H { border: 2px solid var(--color-primary); background: rgb(239 246 255); border-radius: var(--radius-md); }
 .hol { font-weight: 700; color: var(--color-primary-hover); }
 
-/* ---------- Vista de 5 Dias Corridos — Design System secção 3.4 ---------- */
+/* small/p com estado também recebem badge (design: nunca só cor) */
+small.X, small.V, small.T { border-radius: var(--radius-full); padding: 1px 6px; font-weight: 600; }
+p.X { color: #991b1b; font-weight: 600; }
+
+/* ================================================================
+   VISTA DE 5 DIAS CORRIDOS — Design System secção 3.4
+   ================================================================ */
 .cal-5dias {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -504,7 +606,9 @@ body.wide { max-width: none; padding: 0; }
   display: inline-block;
 }
 
-/* ---------- Vista de 7 Dias Compactos — Design System secção 4.3 ---------- */
+/* ================================================================
+   VISTA DE 7 DIAS COMPACTOS — Design System secção 4.3
+   ================================================================ */
 .cal-7dias {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -534,8 +638,11 @@ body.wide { max-width: none; padding: 0; }
   font-weight: 600;
 }
 
-/* ---------- Tabelas — Design System secção 5.2 ---------- */
+/* ================================================================
+   TABELAS — Design System secção 5.2
+   ================================================================ */
 table { width: 100%; border-collapse: collapse; }
+td, th { padding: var(--space-2) var(--space-3); }
 table.tb, table.mapa { border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
 table.tb th, table.tb td, table.mapa th, table.mapa td {
   border: 1px solid var(--color-border);
@@ -547,28 +654,43 @@ table.tb th, table.tb td, table.mapa th, table.mapa td {
 table.tb th:first-child, table.tb td:first-child { text-align: left; }
 table.mapa th, table.mapa td { text-align: center; }
 table.mapa td.l { text-align: left; }
-table.tb th { background: var(--color-surface); font-weight: 600; color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+table.tb th {
+  background: var(--color-surface);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
 table.tb .tot { font-weight: 700; background: #f8fafc; }
 table.tb tr:nth-child(even) td { background: #fdfdfd; }
 
-/* Wrapper responsivo para tabelas (layout inalterado) */
+/* Wrapper responsivo para tabelas */
 .table-wrap {
   overflow-x: auto;
-  margin: 1rem 0;
+  margin: var(--space-4) 0;
   -webkit-overflow-scrolling: touch;
 }
+.sc { overflow-x: auto; margin: var(--space-3) 0; -webkit-overflow-scrolling: touch; }
 
-/* ---------- Compose / formulários longos — Design System secção 5.3 ---------- */
+/* ================================================================
+   COMPOSE / FORMULÁRIOS LONGOS — secção 5.3
+   ================================================================ */
 .compose { display: grid; gap: 1.25rem; max-width: 560px; }
 .compose textarea { font: inherit; padding: 0.8rem; }
-.chk { display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; margin: 0.9rem 0; cursor: pointer; }
+.chk { display: flex; align-items: center; gap: var(--space-3); font-size: 0.9rem; margin: 0.9rem 0; cursor: pointer; }
 .chk input { width: auto; flex: 0 0 auto; }
 
-/* ---------- Password toggle ---------- */
-.pw { display: flex; gap: 0.75rem; align-items: center; }
+/* ================================================================
+   PASSWORD TOGGLE
+   ================================================================ */
+.pw { display: flex; gap: var(--space-3); align-items: center; }
 .pw input { flex: 1; min-width: 0; }
+.pw button { min-height: auto; padding: 0.55rem 0.9rem; flex: none; }
 
-/* ---------- Estados específicos (apenas aparência) ---------- */
+/* ================================================================
+   ESTADOS ESPECÍFICOS
+   ================================================================ */
 .sum { font-weight: 700; color: var(--color-primary-hover); }
 .pre { white-space: pre-wrap; margin: 0.4rem 0; font-size: 0.9rem; line-height: 1.5; }
 .ph {
@@ -583,32 +705,37 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
   z-index: 100;
   object-fit: contain;
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  cursor: zoom-out;
 }
-.sc { overflow-x: auto; margin: 0.75rem 0; -webkit-overflow-scrolling: touch; }
 
-/* ---------- Mapa / impressão (layout inalterado, apenas cores) ---------- */
+/* ================================================================
+   MAPA / IMPRESSÃO
+   ================================================================ */
 .mapa th { background: var(--color-surface); }
 .mapa .ln { margin: 0.4rem 0; font-weight: 700; }
 .mapa .nb { font-weight: 400; color: var(--color-text-muted); }
-.mapa .lg { width: auto; margin: 1rem 0; }
-.mapa .ft { display: flex; gap: 1.5rem; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
+.mapa .lg { width: auto; margin: var(--space-4) 0; }
+.mapa .ft { display: flex; gap: var(--space-6); align-items: center; margin-top: var(--space-4); flex-wrap: wrap; }
 .mapa .ger { margin-left: auto; }
 
 @media print {
-  .top, .side, .noprint, .tabs, button, .sc, .compose button, .fixo-bottom { display: none !important; }
-  body { background: #fff; padding: 0; max-width: none; padding-bottom: 0; }
+  .top, .side, .noprint, .tabs, button, .sc, .compose button, .fixo-bottom, .nav { display: none !important; }
+  body { background: #fff; padding: 0; max-width: none; }
   .adm { display: block; }
   .mapa .sc { overflow: visible; }
   .mapa h2 { margin: 0; }
   table.tb th, table.tb td { white-space: normal; font-size: 10px; padding: 3px 5px; border: 1px solid #000; }
+  tr { page-break-inside: avoid; }
+  thead { display: table-header-group; }
   .card { border: 1px solid #000; box-shadow: none; }
-  @page { size: A4; margin: 12mm; -webkit-print-color-adjust: exact; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { size: A4 landscape; margin: 12mm; }
 }
 
-/* ---------- Utilitários de largura (layout inalterado) ---------- */
+/* ---------- Utilitários de largura ---------- */
 .w { min-width: 700px; }
 
-/* ---------- Estados de carga / util ---------- */
+/* ---------- Estados de carga ---------- */
 .skeleton {
   background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
   background-size: 200% 100%;
@@ -618,64 +745,78 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
 }
 @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-/* ---------- Relógio / horas em monospace — Design System secção 2 ---------- */
-.mono, time, .hora, .duracao {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+/* ---------- prefers-reduced-motion (secção 7) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-/* ---------- Responsividade — breakpoints Design System secção 8 ---------- */
+/* ================================================================
+   RESPONSIVIDADE — breakpoints Design System secção 8
+   ================================================================ */
 
 /* Até 375 px — Layout compacto, fontes reduzidas, padding menor */
 @media (max-width: 375px) {
-  .top { padding: 0 1rem; height: auto; flex-direction: column; align-items: stretch; gap: 0.75rem; }
+  .top { padding: 0 1rem; height: auto; flex-direction: column; align-items: stretch; gap: var(--space-3); }
   .top > span { justify-content: center; width: 100%; }
   .tabs button { padding: 0.7rem 0.5rem; font-size: 0.8rem; }
-  .main { padding: 1rem; }
-  .form-card { padding: 1rem; }
+  .main { padding: var(--space-4); }
+  .form-card { padding: var(--space-4); }
   .big { width: 100%; font-size: 1rem; padding: 0.9rem 1rem; }
   .btn { width: 100%; }
   .d { min-height: 72px; font-size: 0.75rem; padding: 0.55rem; }
   .g > b { font-size: 0.7rem; padding: 0.4rem 0; }
   .cal-5dias .dia-semana { min-height: 120px; padding: 6px 2px; }
   .dia-num { font-size: 1rem; }
+  table.tb td, table.tb th { font-size: 0.8rem; padding: 0.5rem 0.6rem; }
 }
 
 /* 376–480 px — Intermédio */
 @media (min-width: 376px) and (max-width: 480px) {
-  .main { padding: 1.25rem; }
-  .form-card { padding: 1.25rem; }
+  .main { padding: var(--space-5); }
+  .form-card { padding: var(--space-5); }
   .d { min-height: 85px; font-size: 0.8rem; padding: 0.65rem; }
   .cal-5dias .dia-semana { min-height: 135px; padding: 8px 3px; }
 }
 
-/* Acima de 481 px — Desktop: header em linha, mais espaço, inputs lado a lado */
+/* Acima de 481 px — Desktop: header em linha, mais espaço */
 @media (min-width: 481px) {
   .adm { grid-template-columns: var(--nav-width) 1fr; }
-  .side { position: sticky; top: var(--header-height); height: calc(100vh - var(--header-height)); overflow-y: auto; }
+  .side {
+    position: sticky;
+    top: var(--header-height);
+    height: calc(100vh - var(--header-height));
+    overflow-y: auto;
+  }
   .tabs { overflow-x: visible; }
   .form-row { grid-template-columns: 1fr 1fr; }
   .top { padding: 0 1.5rem; }
-  .main { padding: 2rem; }
-  /* .compose em linha no desktop (secção 5.3) */
-  .compose { flex-direction: row; }
+  .main { padding: var(--space-6); }
 }
 
-/* Tablet e acima (768px) */
+/* 768 px */
 @media (min-width: 768px) {
   .form-row { grid-template-columns: 1fr 1fr; }
-  .main { padding: 2rem; }
+  .main { padding: var(--space-6); }
   .top { padding: 0 1.5rem; }
 }
 
-/* Desktop (1024px) */
+/* 1024 px */
 @media (min-width: 1024px) {
   .adm { grid-template-columns: var(--nav-width) 1fr; }
-  .side { position: sticky; top: var(--header-height); height: calc(100vh - var(--header-height)); overflow-y: auto; }
+  .side {
+    position: sticky;
+    top: var(--header-height);
+    height: calc(100vh - var(--header-height));
+    overflow-y: auto;
+  }
   .tabs { overflow-x: visible; }
 }
 
-/* 1440px */
+/* 1440 px */
 @media (min-width: 1440px) {
   .main { padding: 3rem; }
 }
