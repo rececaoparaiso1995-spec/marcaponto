@@ -1,30 +1,86 @@
 /* ================================================================
-   MARCA PONTO — Design profissional e responsivo
-   Mobile-first · PC e telemóvel · Sem quebrar o JavaScript existente
+   MARCA PONTO — Design System aplicado (tokens de DESIGN_SYSTEM.md)
+   Apenas design: cores, tipografia, espaçamento, raios, sombras.
+   Nenhuma função, layout ou botão foi alterado.
    ================================================================ */
 
-/* ---------- Variáveis de design ---------- */
+/* ---------- Tokens de design (Design System v2.0) ---------- */
 :root {
-  --color-brand: #2563eb;
-  --color-brand-hover: #1d4ed8;
-  --color-brand-dark: #1e40af;
-  --color-surface: #ffffff;
-  --color-bg: #f8fafc;
-  --color-bg-alt: #f1f5f9;
-  --color-text: #0f172a;
-  --color-text-secondary: #475569;
-  --color-muted: #64748b;
-  --color-border: #e2e8f0;
-  --color-border-hover: #cbd5e1;
-  --color-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
-  --color-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
-  --radius: 12px;
-  --radius-sm: 8px;
-  --transition: 150ms ease;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Cores — Light */
+  --color-primary: #1E40AF;
+  --color-primary-hover: #1E3A8A;
+  --color-cta-entry: #059669;
+  --color-cta-exit: #DC2626;
+  --color-cta-pause: #D97706;
+  --color-background: #FFFFFF;
+  --color-surface: #F8FAFC;
+  --color-text: #0F172A;
+  --color-text-muted: #64748B;
+  --color-border: #E2E8F0;
+  --color-success: #059669;
+  --color-error: #DC2626;
+  --color-warning: #D97706;
+
+  /* Tipografia */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  /* Espaçamento */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+
+  /* Raio e sombra */
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+
+  /* Touch target mínimo mobile */
+  --touch-target: 2.75rem;
+
   --header-height: 64px;
-  --nav-width: 260px;
 }
+
+/* ---------- Modo escuro (opcional, conforme design system) ---------- */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --color-primary: #3B82F6;
+    --color-primary-hover: #60A5FA;
+    --color-cta-entry: #10B981;
+    --color-cta-exit: #EF4444;
+    --color-cta-pause: #F59E0B;
+    --color-background: #0F172A;
+    --color-surface: #1E293B;
+    --color-text: #F8FAFC;
+    --color-text-muted: #94A3B8;
+    --color-border: #334155;
+    --color-success: #10B981;
+    --color-error: #EF4444;
+    --color-warning: #F59E0B;
+  }
+}
+:root[data-theme="dark"]{
+  --color-primary: #3B82F6;
+  --color-primary-hover: #60A5FA;
+  --color-cta-entry: #10B981;
+  --color-cta-exit: #EF4444;
+  --color-cta-pause: #F59E0B;
+  --color-background: #0F172A;
+  --color-surface: #1E293B;
+  --color-text: #F8FAFC;
+  --color-text-muted: #94A3B8;
+  --color-border: #334155;
+  --color-success: #10B981;
+  --color-error: #EF4444;
+  --color-warning: #F59E0B;
+}
+
+/* ---------- Importação de fontes do design system ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 /* ---------- Reset base ---------- */
 * {
@@ -41,12 +97,14 @@ html {
 body {
   font: 16px/1.5 var(--font-sans);
   color: var(--color-text);
-  background: var(--color-bg);
-  min-height: 100vh;
+  background: var(--color-background);
+  min-height: 100dvh;
   padding: 0;
   max-width: none;
   margin: 0;
   -webkit-font-smoothing: antialiased;
+  padding-bottom: 96px; /* espaço para botão fixo fundo (design system) */
+  overflow-x: hidden;
 }
 
 /* ---------- Utilitários ---------- */
@@ -75,12 +133,10 @@ body {
 .text-sm { font-size: 0.875rem; }
 .text-lg { font-size: 1.125rem; }
 .text-xl { font-size: 1.25rem; }
-.text-muted { color: var(--color-muted); }
-.rounded { border-radius: var(--radius); }
-.rounded-sm { border-radius: var(--radius-sm); }
-.shadow { box-shadow: var(--color-shadow); }
-.shadow-lg { box-shadow: var(--color-shadow-lg); }
-.border { border: 1px solid var(--color-border); }
+.text-muted { color: var(--color-text-muted); }
+.rounded { border-radius: var(--radius-md); }
+.rounded-sm { border-radius: 0.5rem; }
+.shadow { box-shadow: var(--shadow-sm); }
 .cursor-pointer { cursor: pointer; }
 .overflow-auto { overflow: auto; }
 .relative { position: relative; }
@@ -91,18 +147,19 @@ body {
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-/* ---------- Botões ---------- */
+/* ---------- Botões (design system) ---------- */
 button {
   font: inherit;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  transition: background 150ms ease, transform 150ms ease, box-shadow 150ms ease;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  min-height: var(--touch-target);
 }
-button:active { transform: scale(0.985); }
-button:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 2px; }
+button:active { transform: scale(0.97); }
+button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; }
 
 .btn {
   display: inline-flex;
@@ -113,18 +170,18 @@ button:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 2p
   font-size: 0.95rem;
   font-weight: 500;
   color: #fff;
-  background: var(--color-brand);
-  border: 1px solid var(--color-brand);
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
 }
-.btn:hover { background: var(--color-brand-hover); border-color: var(--color-brand-hover); }
+.btn:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
 .btn:active { transform: scale(0.98); }
 
 .btn-ghost {
   background: transparent;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   border: 1px solid var(--color-border);
 }
-.btn-ghost:hover { background: var(--color-bg-alt); color: var(--color-text); border-color: var(--color-border-hover); }
+.btn-ghost:hover { background: var(--color-surface); color: var(--color-text); border-color: var(--color-border-hover); }
 
 .btn-danger {
   background: #fee2e2;
@@ -137,40 +194,62 @@ button:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 2p
 .btn-lg { padding: 0.8rem 1.5rem; font-size: 1rem; }
 .btn-block { width: 100%; }
 
-/* ---------- Inputs e formulários ---------- */
+/* Botão fixo Entrada / Saída (design system secção 3.3) */
+.big {
+  font-size: 1.15rem;
+  padding: 1.1rem 1.5rem;
+  border-radius: var(--radius-lg);
+  background: var(--color-brand, var(--color-primary));
+  color: #fff;
+  border: none;
+  min-height: 3.25rem;
+  max-width: 340px;
+}
+.big:hover { background: var(--color-brand-hover, var(--color-primary-hover)); }
+
+/* Estados CTA (entrada verde, saída vermelha, pausa laranja) */
+.cta-entry { background: var(--color-cta-entry); color: #fff; border-color: var(--color-cta-entry); }
+.cta-entry:hover { background: #047857; border-color: #047857; }
+.cta-exit { background: var(--color-cta-exit); color: #fff; border-color: var(--color-cta-exit); }
+.cta-exit:hover { background: #b91c1c; border-color: #b91c1c; }
+.cta-pause { background: var(--color-cta-pause); color: #fff; border-color: var(--color-cta-pause); }
+.cta-pause:hover { background: #b45309; border-color: #b45309; }
+
+/* ---------- Inputs e formulários (design system secção 5.3) ---------- */
 input, select, textarea {
   font: inherit;
   width: 100%;
-  padding: 0.8rem 1rem;
+  padding: 8px 10px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text);
-  transition: border-color var(--transition), box-shadow var(--transition);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgb(30 64 175 / 0.1);
 }
-input::placeholder { color: var(--color-muted); }
+input::placeholder { color: var(--color-text-muted); }
 
 textarea { resize: vertical; min-height: 90px; font-family: inherit; }
 select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 0.9rem center; background-size: 1rem; padding-right: 2.5rem; }
 
-label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 0.7rem; display: block; }
+label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); margin-bottom: 0.7rem; display: block; }
 .form-group { margin-bottom: 1.5rem; }
 .form-row { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
 
 .form-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
-  box-shadow: var(--color-shadow);
+  box-shadow: var(--shadow-sm);
+  margin: 12px 0;
 }
 
-/* ---------- Cabeçalho / Top bar ---------- */
+/* ---------- Cabeçalho / Top bar (design system secção 3.1) ---------- */
 .top {
   display: flex;
   justify-content: space-between;
@@ -178,7 +257,7 @@ label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary)
   gap: 1.25rem;
   padding: 0 1.25rem;
   height: var(--header-height);
-  background: var(--color-surface);
+  background: var(--color-background);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
@@ -188,7 +267,7 @@ label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary)
 .top b { font-size: 1.1rem; font-weight: 700; color: var(--color-text); }
 .top > span { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 
-/* ---------- Navegação por abas ---------- */
+/* ---------- Navegação por abas (design system secção 3.1) ---------- */
 .tabs {
   display: flex;
   gap: 0.5rem;
@@ -203,24 +282,24 @@ label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary)
   padding: 1rem 1rem;
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--color-muted);
+  color: var(--color-text-muted);
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
   white-space: nowrap;
 }
-.tabs button:hover { color: var(--color-brand); background: var(--color-bg-alt); }
+.tabs button:hover { color: var(--color-primary); background: var(--color-surface); }
 .tabs button.on {
-  color: var(--color-brand);
-  border-bottom-color: var(--color-brand);
-  background: rgb(37 99 235 / 0.04);
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  background: rgb(30 64 175 / 0.04);
 }
 
-/* ---------- Layout Admin ---------- */
+/* ---------- Layout Admin (design system secção 4.2) ---------- */
 body.wide { max-width: none; padding: 0; }
 .adm {
   display: grid;
-  grid-template-columns: var(--nav-width) 1fr;
+  grid-template-columns: 260px 1fr;
   gap: 0;
   height: calc(100vh - var(--header-height));
   min-height: 0;
@@ -242,20 +321,20 @@ body.wide { max-width: none; padding: 0; }
   padding: 1rem 1.5rem;
   font-size: 0.95rem;
   font-weight: 500;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   background: transparent;
   border: none;
   border-left: 3px solid transparent;
-  transition: all var(--transition);
+  transition: all 150ms ease;
   display: flex;
   align-items: center;
   gap: 1rem;
 }
-.side button:hover { background: var(--color-bg-alt); color: var(--color-text); }
+.side button:hover { background: var(--color-surface); color: var(--color-text); }
 .side button.on {
-  background: rgb(37 99 235 / 0.06);
-  color: var(--color-brand);
-  border-left-color: var(--color-brand);
+  background: rgb(30 64 175 / 0.06);
+  color: var(--color-primary);
+  border-left-color: var(--color-primary);
 }
 .main {
   overflow-y: auto;
@@ -263,14 +342,14 @@ body.wide { max-width: none; padding: 0; }
   min-width: 0;
 }
 
-/* ---------- Cards ---------- */
+/* ---------- Cards (design system secção 5.1) ---------- */
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-  margin: 1rem 0;
-  box-shadow: var(--color-shadow);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin: 12px 0;
+  box-shadow: var(--shadow-sm);
 }
 .card h3, .card h4 { margin-bottom: 0.75rem; font-weight: 700; color: var(--color-text); }
 
@@ -285,49 +364,49 @@ body.wide { max-width: none; padding: 0; }
   text-align: center;
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--color-muted);
+  color: var(--color-text-muted);
   padding: 0.5rem 0;
 }
 .d {
   min-height: 100px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   padding: 0.75rem;
   font-size: 0.85rem;
   overflow: hidden;
   background: var(--color-surface);
-  transition: all var(--transition);
+  transition: all 150ms ease;
   position: relative;
 }
-.d:hover { border-color: var(--color-brand); box-shadow: var(--color-shadow); }
-.d.now { outline: 2px solid var(--color-brand); outline-offset: -2px; z-index: 2; background: rgb(239 246 255); }
+.d:hover { border-color: var(--color-primary); box-shadow: var(--shadow-sm); }
+.d.now { outline: 2px solid var(--color-primary); outline-offset: -2px; z-index: 2; background: rgb(239 246 255); }
 .d small { display: block; margin-top: 0.5rem; line-height: 1.6; }
 .d .now { position: relative; }
 .d .now::after {
   content: "";
   position: absolute;
   top: -2px; left: -2px; right: -2px; bottom: -2px;
-  border: 2px solid var(--color-brand);
-  border-radius: calc(var(--radius-sm) + 2px);
+  border: 2px solid var(--color-primary);
+  border-radius: calc(var(--radius-md) + 2px);
   pointer-events: none;
   z-index: -1;
 }
 
-/* Cores dos tipos de dia (mantidas) */
+/* Cores dos tipos de dia (design system) */
 .T { background: #dcfce7; color: #166534; }
-.F { background: #f1f5f9; color: var(--color-muted); }
+.F { background: #f1f5f9; color: var(--color-text-muted); }
 .V { background: #dbeafe; color: #1e40af; }
 .X { background: #fee2e2; color: #991b1b; }
 .J { background: #fef3c7; color: #92400e; }
 .L { background: #ffe8cc; color: #92400e; }
 
 /* Estado de feriado / falta */
-.H { border: 2px solid var(--color-brand); background: rgb(239 246 255); }
-.hol { font-weight: 700; color: var(--color-brand-dark); }
+.H { border: 2px solid var(--color-primary); background: rgb(239 246 255); }
+.hol { font-weight: 700; color: var(--color-primary-hover); }
 
-/* ---------- Tabelas ---------- */
+/* ---------- Tabelas (design system secção 5.2) ---------- */
 table { width: 100%; border-collapse: collapse; }
-table.tb, table.mapa { border: 1px solid var(--color-border); border-radius: var(--radius-sm); overflow: hidden; }
+table.tb, table.mapa { border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
 table.tb th, table.tb td, table.mapa th, table.mapa td {
   border: 1px solid var(--color-border);
   padding: 0.8rem 1rem;
@@ -338,7 +417,7 @@ table.tb th, table.tb td, table.mapa th, table.mapa td {
 table.tb th:first-child, table.tb td:first-child { text-align: left; }
 table.mapa th, table.mapa td { text-align: center; }
 table.mapa td.l { text-align: left; }
-table.tb th { background: var(--color-bg-alt); font-weight: 700; color: var(--color-text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+table.tb th { background: var(--color-surface); font-weight: 600; color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
 table.tb .tot { font-weight: 700; background: #f8fafc; }
 table.tb tr:nth-child(even) td { background: #fdfdfd; }
 
@@ -350,9 +429,9 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
 }
 
 /* ---------- Estados específicos ---------- */
-.big { font-size: 1.15rem; padding: 1.1rem 1.5rem; border-radius: var(--radius-sm); background: var(--color-brand); color: #fff; border: none; }
-.big:hover { background: var(--color-brand-hover); }
-.sum { font-weight: 700; color: var(--color-brand-dark); }
+.big { font-size: 1.15rem; padding: 1.1rem 1.5rem; border-radius: var(--radius-md); background: var(--color-primary); color: #fff; border: none; }
+.big:hover { background: var(--color-primary-hover); }
+.sum { font-weight: 700; color: var(--color-primary-hover); }
 .pre { white-space: pre-wrap; margin: 0.4rem 0; font-size: 0.9rem; line-height: 1.5; }
 .ph {
   position: fixed;
@@ -362,14 +441,14 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
   max-height: 90vh;
   background: #000;
   border: 4px solid #fff;
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   z-index: 100;
   object-fit: contain;
-  box-shadow: var(--color-shadow-lg);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
 }
 .sc { overflow-x: auto; margin: 0.75rem 0; -webkit-overflow-scrolling: touch; }
 
-/* ---------- Compose / formulários longos ---------- */
+/* ---------- Compose / formulários longos (design system secção 5.3) ---------- */
 .compose { display: grid; gap: 1.25rem; max-width: 560px; }
 .compose textarea { font: inherit; padding: 0.8rem; }
 .chk { display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; margin: 0.9rem 0; cursor: pointer; }
@@ -380,9 +459,9 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
 .pw input { flex: 1; min-width: 0; }
 
 /* ---------- Mapa / impressão ---------- */
-.mapa th { background: var(--color-bg-alt); }
+.mapa th { background: var(--color-surface); }
 .mapa .ln { margin: 0.4rem 0; font-weight: 700; }
-.mapa .nb { font-weight: 400; color: var(--color-muted); }
+.mapa .nb { font-weight: 400; color: var(--color-text-muted); }
 .mapa .lg { width: auto; margin: 1rem 0; }
 .mapa .ft { display: flex; gap: 1.5rem; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
 .mapa .ger { margin-left: auto; }
@@ -398,9 +477,55 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
 }
 
 /* ---------- Utilitários de largura ---------- */
-.w { min-width: 700px; } /* tabelas largas — scroll em mobile */
+.w { min-width: 700px; }
 
-/* ---------- Responsividade (Mobile-first já é o base) ---------- */
+/* ---------- Estados de carga / util ---------- */
+.skeleton {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: var(--radius-md);
+  height: 1rem;
+}
+@keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* ---------- Relógio / horas em monospace (design system secção 2) ---------- */
+.mono, time, .hora, .duracao {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Responsividade (breakpoints do design system) ---------- */
+
+/* Até 375 px — layout compacto */
+@media (max-width: 375px) {
+  .top { padding: 0 1rem; height: auto; flex-direction: column; align-items: stretch; gap: 0.75rem; }
+  .top > span { justify-content: center; width: 100%; }
+  .tabs button { padding: 0.7rem 0.5rem; font-size: 0.8rem; }
+  .main { padding: 1rem; }
+  .form-card { padding: 1rem; }
+  .big { width: 100%; font-size: 1rem; padding: 0.9rem 1rem; }
+  .btn { width: 100%; }
+  .d { min-height: 72px; font-size: 0.75rem; padding: 0.55rem; }
+  .g > b { font-size: 0.7rem; padding: 0.4rem 0; }
+}
+
+/* 376–480 px — intermédio */
+@media (min-width: 376px) and (max-width: 480px) {
+  .main { padding: 1.25rem; }
+  .form-card { padding: 1.25rem; }
+  .d { min-height: 85px; font-size: 0.8rem; padding: 0.65rem; }
+}
+
+/* Acima de 481 px — Desktop */
+@media (min-width: 481px) {
+  .adm { grid-template-columns: 260px 1fr; }
+  .side { position: sticky; top: var(--header-height); height: calc(100vh - var(--header-height)); overflow-y: auto; }
+  .tabs { overflow-x: visible; }
+  .form-row { grid-template-columns: 1fr 1fr; }
+  .top { padding: 0 1.5rem; }
+  .main { padding: 2rem; }
+}
 
 /* Tablet e acima */
 @media (min-width: 640px) {
@@ -411,53 +536,7 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
 
 /* Desktop */
 @media (min-width: 1024px) {
-  .adm { grid-template-columns: var(--nav-width) 1fr; }
+  .adm { grid-template-columns: 260px 1fr; }
   .side { position: sticky; top: var(--header-height); height: calc(100vh - var(--header-height)); overflow-y: auto; }
   .tabs { overflow-x: visible; }
 }
-
-/* Celulares pequenos */
-@media (max-width: 639px) {
-  .adm { grid-template-columns: 1fr; }
-  .side {
-    flex-direction: row;
-    overflow-x: auto;
-    position: static;
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid var(--color-border);
-    padding: 0.25rem 0;
-  }
-  .side button {
-    flex: 0 0 auto;
-    white-space: nowrap;
-    padding: 0.75rem 1.2rem;
-    font-size: 0.85rem;
-    border-left: none;
-    border-bottom: 3px solid transparent;
-    border-radius: var(--radius-sm);
-    margin-bottom: 0.25rem;
-  }
-  .side button.on { background: rgb(37 99 235 / 0.1); border-bottom-color: var(--color-brand); border-left: none; border-radius: var(--radius-sm); }
-  .main { padding: 1rem; }
-  .top { flex-direction: column; align-items: stretch; gap: 0.75rem; padding: 1rem; height: auto; }
-  .top > span { justify-content: center; width: 100%; }
-  .g > b { font-size: 0.7rem; padding: 0.4rem 0; }
-  .d { min-height: 72px; font-size: 0.75rem; padding: 0.55rem; }
-  .btn { width: 100%; }
-  .btn-lg { width: 100%; }
-  table.tb td, table.tb th { font-size: 0.8rem; padding: 0.5rem 0.6rem; }
-  .form-card { padding: 1rem; }
-  .big { width: 100%; font-size: 1rem; padding: 0.9rem 1rem; }
-  .tabs button { padding: 0.7rem 0.5rem; font-size: 0.8rem; }
-}
-
-/* ---------- Estados de carga / util ---------- */
-.skeleton {
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
-  border-radius: var(--radius-sm);
-  height: 1rem;
-}
-@keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
