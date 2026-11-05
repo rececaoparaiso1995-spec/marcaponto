@@ -1,100 +1,59 @@
 /* ================================================================
    MARCA PONTO — Design System v2.0 aplicado na íntegra
-   Fonte de verdade: DESIGN_SYSTEM.md (secções 2, 3, 4, 5, 6, 7, 8)
+   Fonte: DESIGN_SYSTEM.md (secções 2, 3, 4, 5, 6, 7, 8)
+   Light mode apenas (sem dark mode, conforme pedido).
    Ficheiro fora da pasta "versao estavel".
-   app.js intocado — só CSS.
    ================================================================ */
 
-/* ---------- Fontes (secção 2: Inter + JetBrains Mono) ---------- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
-/* ================================================================
-   TOKENS — Design System secção 2
-   ================================================================ */
+/* ---------- Tokens de design — Design System secção 2 ---------- */
 :root {
   /* Cores — Light */
-  --color-primary: #1E40AF;
-  --color-primary-hover: #1E3A8A;
-  --color-cta-entry: #059669;
-  --color-cta-exit: #DC2626;
-  --color-cta-pause: #D97706;
-  --color-background: #FFFFFF;
-  --color-surface: #F8FAFC;
-  --color-text: #0F172A;
-  --color-text-muted: #64748B;
-  --color-border: #E2E8F0;
+  --color-primary: #1E40AF;        /* Botão principal, cabeçalho, destaques */
+  --color-primary-hover: #1E3A8A;  /* Hover do primário */
+  --color-cta-entry: #059669;      /* Botão "Registar Entrada" (verde) */
+  --color-cta-exit: #DC2626;       /* Botão "Registar Saída" (vermelho) */
+  --color-cta-pause: #D97706;      /* Botão "Pausa" / "Retomar" */
+  --color-background: #FFFFFF;     /* Fundo da página */
+  --color-surface: #F8FAFC;        /* Cards, painéis elevados */
+  --color-text: #0F172A;           /* Texto principal */
+  --color-text-muted: #64748B;     /* Texto secundário, helper text */
+  --color-border: #E2E8F0;         /* Bordas, divisórias */
   --color-border-hover: #CBD5E1;
-  --color-success: #059669;
-  --color-error: #DC2626;
-  --color-warning: #D97706;
+  --color-success: #059669;        /* Confirmações */
+  --color-error: #DC2626;          /* Erros, estados inválidos */
+  --color-warning: #D97706;        /* Alertas, atrasos */
 
-  /* Tipografia */
+  /* Tipografia (secção 2) */
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
-  /* Espaçamento */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
+  /* Espaçamento (secção 2) */
+  --space-1: 0.25rem;  /* 4px  */
+  --space-2: 0.5rem;   /* 8px  */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.25rem;  /* 20px */
+  --space-6: 1.5rem;   /* 24px */
 
-  /* Raio e sombra */
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-full: 9999px;
+  /* Raio e sombra (secção 2) */
+  --radius-md: 0.5rem;    /* 8px */
+  --radius-lg: 0.75rem;   /* 12px */
+  --radius-full: 9999px;  /* píldora / badge */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 
-  /* Touch target mínimo mobile */
-  --touch-target: 2.75rem;
+  /* Touch target mínimo mobile (secção 2) */
+  --touch-target: 2.75rem; /* 44px */
 
-  /* Breakpoint desktop para padding do main (secção 3.2) */
-  --page-pad: var(--space-4);   /* 16px mobile → 20px desktop */
+  /* Padding do main: 16px mobile → 20px desktop (secção 3.2) */
+  --page-pad: var(--space-4);
 
   --header-height: 64px;
   --transition: 150ms ease;
 }
 
-/* ---------- Modo escuro (secção 2) ---------- */
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --color-primary: #3B82F6;
-    --color-primary-hover: #60A5FA;
-    --color-cta-entry: #10B981;
-    --color-cta-exit: #EF4444;
-    --color-cta-pause: #F59E0B;
-    --color-background: #0F172A;
-    --color-surface: #1E293B;
-    --color-text: #F8FAFC;
-    --color-text-muted: #94A3B8;
-    --color-border: #334155;
-    --color-border-hover: #475569;
-    --color-success: #10B981;
-    --color-error: #EF4444;
-    --color-warning: #F59E0B;
-  }
-}
-:root[data-theme="dark"]{
-  --color-primary: #3B82F6;
-  --color-primary-hover: #60A5FA;
-  --color-cta-entry: #10B981;
-  --color-cta-exit: #EF4444;
-  --color-cta-pause: #F59E0B;
-  --color-background: #0F172A;
-  --color-surface: #1E293B;
-  --color-text: #F8FAFC;
-  --color-text-muted: #94A3B8;
-  --color-border: #334155;
-  --color-border-hover: #475569;
-  --color-success: #10B981;
-  --color-error: #EF4444;
-  --color-warning: #F59E0B;
-}
-
 /* ================================================================
    RESET + BASE — secção 3.2
-   body: min-height 100dvh · padding-bottom 96px (botão fixo) · overflow-x hidden
+   body: min-height 100dvh · padding-bottom 96px c/ botão fixo · overflow-x hidden
    ================================================================ */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -116,11 +75,11 @@ body {
 }
 
 /* Espaço para o botão fixo Entrada/Saída (secção 3.2: padding-bottom 96px) */
-body:not(.wide):has(.big) {
-  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+body:not(.wide):has(.fixo-bottom) {
+  padding-bottom: calc(96px + var(--space-6));
 }
 
-/* Admin/chefe: sem padding — o .main tem o seu próprio (secção 4.2) */
+/* Admin/chefe: sem padding — o .admin-main tem o seu próprio (secção 4.2) */
 body.wide { padding: 0; }
 
 /* ---------- Headings (secção 2: Inter 600–700, 1rem–1.25rem) ---------- */
@@ -148,7 +107,7 @@ p:first-child { margin-top: 0; }
 }
 
 /* ================================================================
-   UTILITÁRIOS (classes geradas pelo app.js — layout intacto)
+   UTILITÁRIOS (classes ainda usadas pelo app.js)
    ================================================================ */
 .hidden, [hidden] { display: none !important; }
 .sr-only {
@@ -192,6 +151,146 @@ p:first-child { margin-top: 0; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
 
 /* ================================================================
+   CABEÇALHO — secção 3.1 / 4.1
+   user-name + user-sub + top-extra · fixo no topo · border-bottom
+   ================================================================ */
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 0 var(--space-5);
+  min-height: var(--header-height);
+  background: var(--color-background);      /* secção 3.2 */
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  flex-wrap: wrap;
+}
+/* No modo utilizador, estica à largura total da janela */
+body:not(.wide) .top {
+  margin-inline: calc(-1 * var(--page-pad));
+  padding-inline: var(--page-pad);
+}
+.user-name { font-size: 1.1rem; font-weight: 700; color: var(--color-text); line-height: 1.2; }
+.user-sub { font-size: 0.8rem; color: var(--color-text-muted); }
+.top-extra { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+
+/* Cabeçalho de secção interna (ex.: "Em serviço agora" no admin) */
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-2) 0;
+  flex-wrap: wrap;
+}
+.section-head h2 { margin: 0; }
+
+/* ================================================================
+   TABS — secção 3.1 / 4.1
+   Scroll horizontal em ecrãs pequenos · background --color-surface
+   Utilizador: Ponto, Formações, Pedidos, Recados
+   Admin: Início, Utilizadores, …, Segurança (secção 4.1)
+   ================================================================ */
+.tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  background: var(--color-surface);         /* secção 3.2 */
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;                         /* secção 3.2 */
+  scrollbar-width: none;
+  position: sticky;
+  top: 0;
+  z-index: 39;
+}
+body:not(.wide) .tabs {
+  top: var(--header-height);
+  margin-inline: calc(-1 * var(--page-pad));
+  padding-inline: var(--page-pad);
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tabs button {
+  flex: 1 1 auto;
+  padding: var(--space-4);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  white-space: nowrap;
+  min-height: auto;
+}
+.tabs button:hover { color: var(--color-primary); background: transparent; border-bottom-color: transparent; }
+.tabs button.active,
+.tabs button.on {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  background: rgb(30 64 175 / 0.04);
+}
+
+/* ================================================================
+   MAIN — secção 3.2
+   padding 16px (mobile) / 20px (desktop)
+   ================================================================ */
+.app-main { padding-block: var(--space-4); }
+
+/* Admin: .admin-main (secção 4.2) — sem sidebar, sem botão fixo */
+.admin-main {
+  padding: var(--page-pad);
+  min-width: 0;
+}
+
+/* ================================================================
+   BOTÃO FIXO ENTRADA / SAÍDA — secção 3.3
+   .fixo-bottom: position fixed, bottom 0, largura total, z-index 1000
+   Verde = Registar Entrada (data-k="in")
+   Vermelho = Registar Saída (data-k="out")
+   ================================================================ */
+.fixo-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;                            /* secção 3.2 */
+  background: var(--color-background);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-3) var(--page-pad) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  justify-content: center;
+}
+
+.big {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: min(340px, 100%);                  /* max-width 340px (secção 3.3) */
+  font-size: 1.15rem;
+  font-weight: 600;
+  padding: 1.1rem 1.5rem;
+  min-height: 3.25rem;                      /* secção 3.3 */
+  border-radius: var(--radius-lg);          /* secção 3.3 */
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2);
+}
+
+/* Estado: fora → precisa ENTRAR (verde, secção 3.3) */
+.big[data-k="in"] { background: var(--color-cta-entry); }
+.big[data-k="in"]:hover { background: #047857; color: #fff; }
+
+/* Estado: dentro → precisa SAIR (vermelho, secção 3.3) */
+.big[data-k="out"] { background: var(--color-cta-exit); }
+.big[data-k="out"]:hover { background: #b91c1c; color: #fff; }
+
+/* ================================================================
    BOTÕES — secção 5.4
    padrão (branco/escuro) · primary (primário) · danger (saída) · success (entrada)
    ================================================================ */
@@ -203,7 +302,7 @@ button {
   color: var(--color-text);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  cursor: pointer;
+  cursor: pointer;                          /* secção 7 */
   padding: 0.55rem var(--space-4);
   min-height: var(--touch-target);
   transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition);
@@ -212,7 +311,7 @@ button {
 }
 button:hover { border-color: var(--color-primary); color: var(--color-primary); }
 button:active { transform: scale(0.97); }              /* secção 3.3 */
-button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; } /* secção 3.3 */
+button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; } /* secção 3.3/7 */
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Ação principal (secção 5.4) */
@@ -273,66 +372,8 @@ button.success:hover, .btn-success:hover { background: #047857; border-color: #0
 .cta-pause:hover { background: #b45309; border-color: #b45309; color: #fff; }
 
 /* ================================================================
-   BOTÃO FIXO ENTRADA / SAÍDA — secção 3.3
-   Fixo no fundo, sempre visível sobre o scroll.
-   Verde = Registar Entrada (data-k="in")
-   Vermelho = Registar Saída (data-k="out")
-   O app.js define data-k="in"/"out" — o CSS só lê o atributo.
-   ================================================================ */
-.fixo-bottom {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  z-index: 1000;                            /* secção 3.2 */
-  background: var(--color-background);
-  border-top: 1px solid var(--color-border);
-  padding: var(--space-3) var(--page-pad) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
-  display: flex;
-  justify-content: center;
-}
-
-.big {
-  position: fixed;
-  bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
-  left: 0;
-  right: 0;
-  margin: 0 auto;
-  width: min(340px, calc(100vw - 2 * var(--page-pad) - var(--space-4)));
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  font-size: 1.15rem;
-  font-weight: 600;
-  padding: 1.1rem 1.5rem;
-  min-height: 3.25rem;                      /* secção 3.3 */
-  border-radius: var(--radius-lg);          /* secção 3.3 */
-  background: var(--color-primary);
-  color: #fff;
-  border: none;
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2);
-}
-
-/* Estado: fora → precisa ENTRAR (verde, secção 3.3) */
-.big[data-k="in"] {
-  background: var(--color-cta-entry);
-}
-.big[data-k="in"]:hover { background: #047857; color: #fff; }
-
-/* Estado: dentro → precisa SAIR (vermelho, secção 3.3) */
-.big[data-k="out"] {
-  background: var(--color-cta-exit);
-}
-.big[data-k="out"]:hover { background: #b91c1c; color: #fff; }
-
-.big:active { transform: scale(0.97); }     /* secção 3.3 */
-
-/* ================================================================
    INPUTS E FORMULÁRIOS — secção 5.3
-   padding 8px 10px · radius-md · foco com anel --color-primary
+   width 100% · padding 8px 10px · radius-md · foco com anel azul
    ================================================================ */
 input, select, textarea {
   font: inherit;
@@ -376,170 +417,124 @@ label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); ma
 }
 
 /* ================================================================
-   CABEÇALHO — secção 3.1 / 3.2
-   Fixo no topo (sticky) · border-bottom · background --color-background
-   Full-bleed: contrapõe o padding lateral do body.
+   NAVEGAÇÃO DE SEMANA — secção 3.4 / 4.3
+   .semana-header: setas ‹ › + label do intervalo
    ================================================================ */
-.top {
+.semana-header,
+.semana-header-compacta {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  gap: var(--space-4);
-  padding: 0 var(--space-5);
-  height: var(--header-height);
-  background: var(--color-background);
-  border-bottom: 1px solid var(--color-border);
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  flex-wrap: wrap;
-}
-/* No modo utilizador, estica para a largura total da janela */
-body:not(.wide) .top {
-  margin-inline: calc(-1 * var(--page-pad));
-  padding-inline: var(--page-pad);
-}
-.top b { font-size: 1.1rem; font-weight: 700; color: var(--color-text); }
-.top > span { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
-.top h2 { margin: 0; }
-
-/* ================================================================
-   TABS — secção 3.1 / 3.2
-   Scroll horizontal em ecrãs pequenos · background --color-surface
-   ================================================================ */
-.tabs {
-  display: flex;
-  gap: var(--space-2);
-  margin: 0;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  overflow-x: auto;                         /* secção 3.2 */
-  scrollbar-width: none;
-  position: sticky;
-  top: var(--header-height);
-  z-index: 39;
-}
-/* No modo utilizador, estica para a largura total da janela */
-body:not(.wide) .tabs {
-  margin-inline: calc(-1 * var(--page-pad));
-  padding-inline: var(--page-pad);
-}
-.tabs::-webkit-scrollbar { display: none; }
-.tabs button {
-  flex: 1 1 auto;
-  padding: var(--space-4);
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-  white-space: nowrap;
-  min-height: auto;
-}
-.tabs button:hover { color: var(--color-primary); background: transparent; border-bottom-color: transparent; }
-.tabs button.on,
-.tabs button.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-  background: rgb(30 64 175 / 0.04);
-}
-
-/* ================================================================
-   NAVEGAÇÃO DE MÊS (classe .nav do app.js — setas ◀ ▶ + mês)
-   Equivalente ao .semana-header do design system (secção 3.4)
-   ================================================================ */
-.nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: var(--space-3);
   margin: var(--space-3) 0;
 }
-.nav b {
-  font-family: var(--font-mono);            /* horas/datas em mono (secção 2) */
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text);
-  min-width: 8ch;
-  text-align: center;
-}
-.nav button { min-height: auto; padding: 0.35rem 0.7rem; }
+.semana-label { font-weight: 600; font-size: 0.95rem; color: var(--color-text); }
+.semana-label-compacta { font-weight: 600; font-size: 0.85rem; color: var(--color-text); }
+
+.btn-seta { min-height: auto; padding: 0.35rem 0.7rem; flex: none; }
+.btn-seta-compacto { min-height: auto; padding: 0.25rem 0.55rem; font-size: 0.85rem; flex: none; }
 
 /* ================================================================
-   ADMIN — secção 4.2
-   SEM sidebar lateral → navegação horizontal no topo (tabs).
-   SEM botão fixo fundo.
-   .admin-main (o .main do app.js): padding 16px mobile / 20px desktop.
+   VISTA DE 5 DIAS CORRIDOS — secção 3.4 (aba Ponto, utilizador)
+   grid 5 colunas · gap 3px · células min-height 150px
    ================================================================ */
-.adm {
-  display: block;                           /* sem grelha lateral */
-  height: auto;
-  min-height: 0;
+.cal-5dias {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);   /* secção 3.4 */
+  gap: 3px;                                /* secção 3.4 */
 }
-
-/* A antiga sidebar passa a barra horizontal de navegação */
-.side {
-  display: flex;
-  flex-direction: row;                      /* horizontal, como tabs */
-  gap: var(--space-1);
-  background: var(--color-surface);
-  border-right: none;
-  border-bottom: 1px solid var(--color-border);
-  overflow-x: auto;                         /* scroll horizontal */
-  position: sticky;
-  top: var(--header-height);
-  z-index: 39;
-  height: auto;
-  padding: var(--space-1) var(--space-2);
-}
-.side button {
-  flex: 0 0 auto;
-  width: auto;
-  text-align: center;
-  padding: 0.8rem 1.1rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-  min-height: auto;
-  white-space: nowrap;
-  transition: all var(--transition);
-}
-.side button:hover { background: transparent; color: var(--color-primary); border-bottom-color: transparent; }
-.side button.on {
-  background: rgb(30 64 175 / 0.04);
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-}
-
-/* Área principal do admin (secção 4.2: padding 16px/20px, overflow-y auto) */
-.main {
-  overflow-y: auto;
-  padding: var(--page-pad);                 /* 16px mobile → 20px desktop */
-  min-width: 0;
-}
-
-/* ================================================================
-   CARDS — secção 5.1
-   surface · border · radius-lg · padding 16px · shadow-sm · margin 12px 0
-   ================================================================ */
-.card {
+.dia-semana {
+  min-height: 150px;                       /* secção 3.4 */
+  padding: 10px 4px;                       /* secção 3.4 */
+  border-radius: var(--radius-md);         /* secção 3.4 */
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-  margin: var(--space-3) 0;
-  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
 }
-.card h3, .card h4 { margin-bottom: var(--space-3); font-weight: 700; color: var(--color-text); }
+.dia-semana.now { outline: 2px solid var(--color-primary); outline-offset: -2px; background: rgb(239 246 255); }
+.dia-semana.H { border: 2px solid var(--color-primary); background: rgb(239 246 255); }
+.dia-semana.X { background: #fee2e2; }
+.dia-semana.J { background: #fef3c7; }
+.dia-semana.L { background: #ffe8cc; }
+.dia-num { font-size: 1.125rem; font-weight: 700; color: var(--color-text); }        /* secção 3.4 */
+.dia-semana-nome { font-size: 0.6875rem; text-transform: uppercase; color: var(--color-text-muted); } /* secção 3.4 */
+.dia-turno { font-family: var(--font-mono); font-size: 0.72rem; }                    /* secção 3.4 */
+.dia-turno.t { color: var(--color-primary); }       /* turno de trabalho (secção 3.4) */
+.dia-turno.f { color: var(--color-text-muted); }    /* folga (secção 3.4) */
+.dia-turno.v { color: var(--color-cta-entry); }     /* férias (secção 3.4) */
+
+/* Marcações E/S — pílulas coloridas (secção 3.4) */
+.marcacao.in {
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--color-cta-entry);
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 1px 5px;
+  border-radius: var(--radius-full);
+  display: inline-block;
+  font-family: var(--font-mono);
+  align-self: flex-start;
+}
+.marcacao.out {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--color-cta-exit);
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 1px 5px;
+  border-radius: var(--radius-full);
+  display: inline-block;
+  font-family: var(--font-mono);
+  align-self: flex-start;
+}
 
 /* ================================================================
-   CALENDÁRIO — grade de 7 colunas (layout do app.js)
+   VISTA DE 7 DIAS COMPACTOS — secção 4.3 (admin, detalhe do utilizador)
+   grid 7 colunas · gap 2px · células min-height 85px
+   ================================================================ */
+.semana-compacta { margin: var(--space-3) 0; }
+.cal-7dias {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);   /* secção 4.3 */
+  gap: 2px;                                /* secção 4.3 */
+}
+.dia-compacto {
+  min-height: 85px;                        /* secção 4.3 */
+  padding: 5px 2px;                        /* secção 4.3 */
+  border-radius: var(--radius-md);         /* secção 4.3 */
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+.dia-compacto.now { outline: 2px solid var(--color-primary); outline-offset: -2px; background: rgb(239 246 255); }
+.dia-compacto.H { border: 2px solid var(--color-primary); background: rgb(239 246 255); }
+.dia-compacto.X { background: #fee2e2; }
+.dia-compacto.J { background: #fef3c7; }
+.dia-compacto.L { background: #ffe8cc; }
+.dia-num-compacto { font-size: 0.9rem; font-weight: 700; color: var(--color-text); }   /* secção 4.3 */
+.dia-nome-compacto { font-size: 0.6rem; text-transform: uppercase; color: var(--color-text-muted); } /* secção 4.3 */
+.dia-turno-compacto { font-family: var(--font-mono); font-size: 0.6rem; }              /* secção 4.3 */
+.marcacao-compacta {
+  font-size: 0.6rem;                       /* secção 4.3 */
+  padding: 1px 5px;                        /* secção 4.3 */
+  border-radius: var(--radius-full);
+  display: inline-block;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  align-self: flex-start;
+}
+.marcacao-compacta.in { background: rgba(5, 150, 105, 0.1); color: var(--color-cta-entry); }
+.marcacao-compacta.out { background: rgba(220, 38, 38, 0.1); color: var(--color-cta-exit); }
+
+.legenda { font-size: 0.75rem; color: var(--color-text-muted); margin-top: var(--space-2); }
+
+/* ================================================================
+   GRELHA MENSAL (dcal / pForm — layout atual do app.js)
    ================================================================ */
 .g {
   display: grid;
@@ -569,12 +564,7 @@ body:not(.wide) .tabs {
   position: relative;
 }
 .d:hover { border-color: var(--color-primary); box-shadow: var(--shadow-sm); }
-.d.now {
-  outline: 2px solid var(--color-primary);
-  outline-offset: -2px;
-  z-index: 2;
-  background: rgb(239 246 255);
-}
+.d.now { outline: 2px solid var(--color-primary); outline-offset: -2px; z-index: 2; background: rgb(239 246 255); }
 .d small { display: block; margin-top: var(--space-2); line-height: 1.6; }
 .d .now { position: relative; }
 .d .now::after {
@@ -588,7 +578,7 @@ body:not(.wide) .tabs {
 }
 .d.dd { cursor: pointer; }
 
-/* Cores dos tipos de dia */
+/* Cores dos tipos de dia (grelha mensal) */
 .T { background: #dcfce7; color: #166534; border-radius: var(--radius-md); }
 .F { background: #f1f5f9; color: var(--color-text-muted); border-radius: var(--radius-md); }
 .V { background: #dbeafe; color: #1e40af; border-radius: var(--radius-md); }
@@ -605,101 +595,25 @@ small.X, small.V, small.T { border-radius: var(--radius-full); padding: 1px 6px;
 p.X { color: #991b1b; font-weight: 600; }
 
 /* ================================================================
-   VISTA DE 5 DIAS CORRIDOS — secção 3.4 (classes do design system)
+   CARDS — secção 5.1
+   surface · border · radius-lg · padding 16px · shadow-sm · margin 12px 0
    ================================================================ */
-.semana-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
   margin: var(--space-3) 0;
+  box-shadow: var(--shadow-sm);
 }
-.semana-label { font-weight: 600; font-size: 0.95rem; }
-.btn-seta { min-height: auto; padding: 0.35rem 0.7rem; }
-
-.cal-5dias {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 3px;
-}
-.dia-semana {
-  min-height: 150px;
-  padding: 10px 4px;
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.dia-num { font-size: 1.125rem; font-weight: 700; color: var(--color-text); }
-.dia-semana-nome { font-size: 0.6875rem; text-transform: uppercase; color: var(--color-text-muted); }
-.dia-turno { font-family: var(--font-mono); font-size: 0.72rem; }
-.dia-turno.t { color: var(--color-primary); }
-.dia-turno.f { color: var(--color-text-muted); }
-.dia-turno.v { color: var(--color-cta-entry); }
-.marcacao.in {
-  background: rgba(5, 150, 105, 0.1);
-  color: var(--color-cta-entry);
-  font-weight: 600;
-  font-size: 0.75rem;
-  padding: 1px 5px;
-  border-radius: var(--radius-full);
-  display: inline-block;
-}
-.marcacao.out {
-  background: rgba(220, 38, 38, 0.1);
-  color: var(--color-cta-exit);
-  font-weight: 600;
-  font-size: 0.75rem;
-  padding: 1px 5px;
-  border-radius: var(--radius-full);
-  display: inline-block;
-}
-
-/* ================================================================
-   VISTA DE 7 DIAS COMPACTOS — secção 4.3 (classes do design system)
-   ================================================================ */
-.semana-compacta { margin: var(--space-3) 0; }
-.semana-header-compacta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
-}
-.semana-label-compacta { font-weight: 600; font-size: 0.85rem; }
-.btn-seta-compacto { min-height: auto; padding: 0.25rem 0.55rem; font-size: 0.85rem; }
-
-.cal-7dias {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-}
-.dia-compacto {
-  min-height: 85px;
-  padding: 5px 2px;
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.dia-num-compacto { font-size: 0.9rem; font-weight: 700; color: var(--color-text); }
-.dia-nome-compacto { font-size: 0.6rem; text-transform: uppercase; color: var(--color-text-muted); }
-.dia-turno-compacto { font-family: var(--font-mono); font-size: 0.6rem; }
-.marcacao-compacta {
-  font-size: 0.6rem;
-  padding: 1px 5px;
-  border-radius: var(--radius-full);
-  display: inline-block;
-  font-weight: 600;
-}
-.legenda { font-size: 0.75rem; color: var(--color-text-muted); margin-top: var(--space-2); }
+.card h3, .card h4 { margin-bottom: var(--space-3); font-weight: 700; color: var(--color-text); }
+.card.J { background: #fef3c7; }
+.card.X { background: #fee2e2; }
 
 /* ================================================================
    TABELAS — secção 5.2
+   .sc: overflow-x auto · table.tb: 100%, font-size 0.8125rem
+   th: surface, 600, uppercase, 0.75rem
    ================================================================ */
 table { width: 100%; border-collapse: collapse; }
 td, th { padding: var(--space-2) var(--space-3); text-align: left; }
@@ -715,11 +629,11 @@ table.tb th:first-child, table.tb td:first-child { text-align: left; }
 table.mapa th, table.mapa td { text-align: center; }
 table.mapa td.l { text-align: left; }
 table.tb th {
-  background: var(--color-surface);
-  font-weight: 600;
+  background: var(--color-surface);        /* secção 5.2 */
+  font-weight: 600;                        /* secção 5.2 */
   color: var(--color-text-muted);
-  font-size: 0.75rem;
-  text-transform: uppercase;
+  font-size: 0.75rem;                      /* secção 5.2 */
+  text-transform: uppercase;               /* secção 5.2 */
   letter-spacing: 0.04em;
 }
 table.tb .tot { font-weight: 700; background: #f8fafc; }
@@ -774,12 +688,22 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
 .mapa .ft { display: flex; gap: var(--space-6); align-items: center; margin-top: var(--space-4); flex-wrap: wrap; }
 .mapa .ger { margin-left: auto; }
 
+/* Orientação da folha na impressão: A4 HORIZONTAL (landscape).
+   Top-level para máxima compatibilidade — alguns browsers não aplicam
+   o @page quando está apenas dentro de @media print. */
+@page { size: A4 landscape; margin: 12mm; }
+
 @media print {
   /* Esconder: .noprint, botões, tabs, cabeçalhos, overlays (secção 6) */
-  .top, .side, .noprint, .tabs, button, .sc, .compose button, .fixo-bottom, .big, .nav { display: none !important; }
-  body { background: #fff; padding: 0; max-width: none; overflow: visible; }
-  .adm { display: block; }
-  .mapa .sc { overflow: visible; }
+  .top, .side, .noprint, .tabs, button, .sc, .compose button, .fixo-bottom, .big, .semana-header, .semana-header-compacta { display: none !important; }
+  body { background: #fff; padding: 0 !important; max-width: none; overflow: visible; }
+  body:not(.wide):has(.fixo-bottom) { padding-bottom: 0 !important; }
+  /* O mapa usa toda a folha, sem paddings do layout */
+  .admin-main { padding: 0 !important; max-width: none !important; }
+  .app-main { padding: 0 !important; }
+  /* Mostrar o mapa: .mapa e table.tb com a tabela principal (secção 6).
+     O .sc do mapa TEM de imprimir — sobrepõe o .sc escondido acima. */
+  .mapa .sc { display: block !important; overflow: visible !important; }
   .mapa h2 { margin: 0; }
   /* Bordas pretas 1px solid #000 (secção 6) */
   table.tb th, table.tb td { white-space: normal; font-size: 10px; padding: 3px 5px; border: 1px solid #000; }
@@ -787,6 +711,7 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
   thead { display: table-header-group; }    /* secção 6 */
   .card { border: 1px solid #000; box-shadow: none; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } /* secção 6 */
+  /* Reforço do landscape dentro do print também */
   @page { size: A4 landscape; margin: 12mm; }
 }
 
@@ -813,49 +738,48 @@ table.tb tr:nth-child(even) td { background: #fdfdfd; }
 }
 
 /* ================================================================
-   RESPONSIVIDADE — secção 8
-   Até 375px compacto · 376–480 intermédio · >481 desktop
-   (secção 7 acrescenta 768, 1024, 1440)
+   RESPONSIVIDADE — secção 8 (375 / 480 / 481+)
+   secção 7 acrescenta 768, 1024, 1440
    ================================================================ */
 
-/* Acima de 481 px — Desktop: mais espaço, inputs lado a lado (secção 8) */
+/* Acima de 481 px — Desktop: header em linha, mais espaço (secção 8) */
 @media (min-width: 481px) {
   :root { --page-pad: var(--space-5); }    /* 20px desktop (secção 3.2) */
   .form-row { grid-template-columns: 1fr 1fr; }
   .tabs { overflow-x: visible; }
-  .side { overflow-x: visible; flex-wrap: wrap; }
 }
 
-/* 768 px */
+/* 768 px (secção 7) */
 @media (min-width: 768px) {
   .form-row { grid-template-columns: 1fr 1fr; }
-}
-
-/* 1024 px */
-@media (min-width: 1024px) {
   .compose { max-width: 640px; }
 }
 
-/* 1440 px */
+/* 1024 px (secção 7) */
+@media (min-width: 1024px) {
+  .admin-main { max-width: 1200px; }
+}
+
+/* 1440 px (secção 7) */
 @media (min-width: 1440px) {
-  .main { max-width: 1200px; margin-inline: auto; }
+  .admin-main { padding: 3rem; }
 }
 
 /* Até 375 px — Layout compacto, fontes reduzidas, padding menor (secção 8) */
 @media (max-width: 375px) {
   :root { --page-pad: var(--space-3); }    /* 12px compacto */
-  .top { padding: var(--space-3) var(--space-4); height: auto; min-height: var(--header-height); }
+  .top { padding: var(--space-3) var(--space-4); min-height: auto; }
   .tabs button { padding: 0.7rem 0.5rem; font-size: 0.8rem; }
-  .side button { padding: 0.7rem 0.9rem; font-size: 0.8rem; }
-  .main { padding: var(--space-3); }
   .form-card { padding: var(--space-4); }
   .big { font-size: 1rem; padding: 0.9rem 1rem; }
   .btn { width: 100%; }
   .d { min-height: 72px; font-size: 0.75rem; padding: 0.55rem; }
-  .g > b { font-size: 0.7rem; padding: 0.4rem 0; }
   .g { gap: 4px; }
+  .g > b { font-size: 0.7rem; padding: 0.4rem 0; }
   .cal-5dias .dia-semana { min-height: 120px; padding: 6px 2px; }
   .dia-num { font-size: 1rem; }
+  .dia-turno { font-size: 0.65rem; }
+  .cal-7dias .dia-compacto { min-height: 72px; }
   table.tb td, table.tb th { font-size: 0.8rem; padding: 0.5rem 0.6rem; }
   h1, h2 { font-size: 1.125rem; }
 }

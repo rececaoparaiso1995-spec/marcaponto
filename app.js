@@ -2,7 +2,7 @@ const API='https://ponto-api.rececaoparaiso1995.workers.dev';
 if(window.top!==window.self){document.documentElement.remove();throw 0}
 const $=document.getElementById('app');
 const h=(t,p={},...k)=>{const e=document.createElement(t);for(const[a,v]of Object.entries(p))a.startsWith('on')?e.addEventListener(a.slice(2),v):e.setAttribute(a,v);e.append(...k.flat().filter(x=>x!=null&&x!==false));return e};
-const btn=(t,f)=>h('button',{onclick:async()=>{try{await f()}catch(x){alert(x.message)}}},t);
+const btn=(t,f)=>h('button',{type:'button',onclick:async()=>{try{await f()}catch(x){alert(x.message)}}},t);
 const show=(...k)=>$.replaceChildren(...k);
 const hm=t=>new Date(t).toLocaleTimeString('pt-PT',{timeZone:'Europe/Lisbon',hour:'2-digit',minute:'2-digit'});
 let tok=sessionStorage.getItem('t'),me=null,PRE={};const PERF=location.hash==='#perf';
@@ -13,7 +13,8 @@ async function api(p,body,raw){if(!body&&!raw&&p in PRE){const v=PRE[p];delete P
  if(r.status===401&&tok){out();throw Error('Sessão expirada')}
  if(raw&&r.ok)return r.blob();const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.e||'Erro');return d}
 function out(){sessionStorage.clear();tok=me=null;login()}
-const head=()=>h('div',{class:'top'},h('b',{},me.name),h('span',{},btn('Mudar password',()=>pw(start)),btn('Sair',async()=>{await api('logout',{}).catch(()=>{});out()})));
+/* Design System secção 3.1: header com user-name, user-sub e top-extra */
+const head=()=>h('header',{class:'top'},h('div',{},h('div',{class:'user-name'},me.name),h('div',{class:'user-sub'},me.role==='admin'?'Administrador • Todos os departamentos':(me.chief?'Chefe • ':'Colaborador • ')+(me.dn||'Sem departamento'))),h('div',{class:'top-extra'},btn('Mudar password',()=>pw(start)),btn('Sair',async()=>{await api('logout',{}).catch(()=>{});out()})));
 const pwf=e=>h('div',{class:'pw'},e,h('button',{type:'button',onclick:ev=>{const s=e.type==='password';e.type=s?'text':'password';ev.target.textContent=s?'Ocultar':'Mostrar'}},'Mostrar')),
  gen=()=>{const A='abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';return [...crypto.getRandomValues(new Uint8Array(12))].map(x=>A[x%A.length]).join('')};
 function pw(back){const o=h('input',{type:'password',placeholder:'Password atual',autocomplete:'current-password',required:''}),n=h('input',{type:'password',placeholder:'Nova (mín. 8)',minlength:8,maxlength:200,required:'',autocomplete:'new-password'}),n2=h('input',{type:'password',placeholder:'Repetir nova',required:'',autocomplete:'new-password'});
@@ -32,66 +33,96 @@ async function zip(files){const E=new TextEncoder(),parts=[],cen=[];let off=0;fo
  const e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cen.reduce((s,x)=>s+x.byteLength,0),true);e.setUint32(16,off,true);return new Blob([...parts,...cen,e],{type:'application/zip'})}
 const ics=L=>{const z=new Date().toISOString().replace(/[-:]|\.\d+/g,''),e=s=>String(s||'').replace(/[\\;,]/g,c=>'\\'+c),d=(a,t)=>a.replace(/-/g,'')+(t?'T'+t.replace(':','')+'00':'');return 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Ponto//PT\r\n'+L.map(x=>`BEGIN:VEVENT\r\nUID:t${x.id}@ponto\r\nDTSTAMP:${z}\r\n`+(x.start?`DTSTART:${d(x.day,x.start)}\r\nDTEND:${d(x.day,x.end||x.start)}\r\n`:`DTSTART;VALUE=DATE:${d(x.day)}\r\n`)+`SUMMARY:${e(x.title)}\r\n`+(x.place?`LOCATION:${e(x.place)}\r\n`:'')+'END:VEVENT\r\n').join('')+'END:VCALENDAR\r\n'};
 async function shrink(f){const b=await createImageBitmap(f),s=Math.min(1,1280/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=b.width*s;c.height=b.height*s;c.getContext('2d').drawImage(b,0,0,c.width,c.height);return new Promise(r=>c.toBlob(r,'image/jpeg',.6))}
-function cal(uid,adm){const box=h('div'),td=new Date().toLocaleDateString('sv-SE');let m=td.slice(0,7);
- const go=n=>{const[y,mo]=m.split('-').map(Number),d=new Date(y,mo-1+n,1);m=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');box.load()};
+/* Design System secção 3.4: vista de 5 dias corridos (utilizador)
+   Design System secção 4.3: vista de 7 dias compactos (admin, detalhe do utilizador)
+   Navegação ‹ › avança/recua STEP dias. Mantém toda a lógica: faltas, atrasos,
+   justificações, feriados, horas por dia, edição admin, fotos. */
+function cal(uid,adm){const box=h('div'),td=new Date().toLocaleDateString('sv-SE'),STEP=adm?7:5;
+ let start=td;
+ if(adm){const w=new Date(td+'T00:00:00');w.setDate(w.getDate()-w.getDay());start=w.toLocaleDateString('sv-SE')}
+ const label=()=>{const A=new Date(start+'T00:00:00'),B=new Date(A);B.setDate(B.getDate()+STEP-1);
+  const f=d=>d.getDate()+' '+d.toLocaleDateString('pt-PT',{month:'short'}).replace('.','');
+  return f(A)+' – '+f(B)+' '+B.getFullYear()};
+ const go=n=>{const d=new Date(start+'T00:00:00');d.setDate(d.getDate()+n*STEP);start=d.toLocaleDateString('sv-SE');box.load()};
  const just=ds=>{const i=h('input',{type:'file',accept:'image/*',onchange:async()=>{try{const f=i.files[0];if(!f)return;const fd=new FormData();fd.append('day',ds);fd.append('file',await shrink(f),'j.jpg');await api('justify',fd);box.load()}catch(x){alert(x.message)}}});i.click()};
  const photo=async id=>{const u=URL.createObjectURL(await api('justif/'+id,null,true));document.body.append(h('img',{class:'ph',src:u,onclick:e=>{e.target.remove();URL.revokeObjectURL(u)}}))};
-const edit=async(ds,p)=>{const cur=[];for(let i=0;i<p.length;i+=2)cur.push(hm(p[i].ts)+'-'+(p[i+1]?hm(p[i+1].ts):''));
-  const v=prompt(`Marcações de ${ds}: entrada-saída (ex: 09:00-13:00 14:00-18:00). Vazio apaga tudo.`,cur.join(' '));if(v===null)return;
-  const list=[];for(const pr of v.trim().split(/\s+/).filter(Boolean)){const[e,x]=pr.split('-');list.push({kind:'in',time:e});if(x)list.push({kind:'out',time:x})}
-  await api('punches/'+uid,{day:ds,p:list});box.load()};
- box.load=async()=>{try{const d=await api(`month/${uid}?m=${m}`),hr=d.hr||{w:{},i:[],mt:0,mx:0,b:0},ho=d.ho||{},hs=d.hs||{esc:0,done:0},[y,mo]=m.split('-').map(Number),n=new Date(y,mo,0).getDate(),f=(new Date(y,mo-1,1).getDay()+6)%7;
-  const g=h('div',{class:'g'},...'Seg Ter Qua Qui Sex Sáb Dom'.split(' ').map(x=>h('b',{},x)),...Array(f).fill(0).map(()=>h('i')));
-  for(let i=1;i<=n;i++){const ds=`${m}-${String(i).padStart(2,'0')}`,s=d.s[ds],p=d.p.filter(x=>x.day===ds),j=d.j[ds],miss=s&&s.type==='T'&&ds<td&&!p.length,late=!!(s&&s.type==='T'&&s.start&&p[0]&&p[0].kind==='in'&&mins(hm(p[0].ts))-mins(s.start)>5);
-   g.append(h('div',{class:'d'+(ho[ds]?' H ':' ')+(miss?(j?'J':'X'):late?(j?'J':'L'):s?s.type:'')+(ds===td?' now':'')},h('b',{},i),ho[ds]&&h('small',{class:'hol'},'Feriado: '+ho[ds]),
-    s&&h('small',{},s.type==='T'?(s.start||'')+'-'+(s.end||''):s.type==='F'?'Folga':'Férias'),
-    ...p.map(x=>h('small',{},(x.kind==='in'?'E ':'S ')+hm(x.ts))),hr.w[ds]!=null&&h('small',{},`⏱ ${fmt(hr.w[ds])}`+(hr.w[ds]>480?` (+${fmt(hr.w[ds]-480)})`:'')),hr.i.includes(ds)&&h('small',{},'⚠ sem saída'),adm&&btn('✎',()=>edit(ds,p)),
-    miss&&(j?(adm?btn('Ver foto',()=>photo(j)):h('small',{},'Justificada')):(adm?h('small',{},'Falta'):btn('Justificar',()=>just(ds)))),late&&(j?(adm?btn('Ver foto (atraso)',()=>photo(j)):h('small',{},'Atraso justificado')):(adm?h('small',{},'⚠ Atraso'):btn('Justificar atraso',()=>just(ds))))))}
-  box.replaceChildren(h('p',{class:'sum'},`Este mês: ${fmt(hr.mt)} trabalhadas · ${fmt(hr.mx)} extra · Banco de horas: ${fmt(hr.b)} · Feriados ${new Date().getFullYear()}: ${hs.esc} a trabalhar, ${hs.done} trabalhados`),h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},m),btn('▶',()=>go(1))),g)}catch(x){alert(x.message)}};
+ const edit=async(ds,p)=>{const cur=[];for(let i=0;i<p.length;i+=2)cur.push(hm(p[i].ts)+'-'+(p[i+1]?hm(p[i+1].ts):''));
+   const v=prompt(`Marcações de ${ds}: entrada-saída (ex: 09:00-13:00 14:00-18:00). Vazio apaga tudo.`,cur.join(' '));if(v===null)return;
+   const list=[];for(const pr of v.trim().split(/\s+/).filter(Boolean)){const[e,x]=pr.split('-');list.push({kind:'in',time:e});if(x)list.push({kind:'out',time:x})}
+   await api('punches/'+uid,{day:ds,p:list});box.load()};
+ box.load=async()=>{try{const days=[];{const d0=new Date(start+'T00:00:00');for(let i=0;i<STEP;i++){const d=new Date(d0);d.setDate(d.getDate()+i);days.push(d.toLocaleDateString('sv-SE'))}}
+  const months=[...new Set(days.map(x=>x.slice(0,7)))];
+  const res=await Promise.all(months.map(m=>api(`month/${uid}?m=${m}`)));
+  const D={s:{},p:[],j:{},ho:{},hr:{w:{},i:[]}};
+  res.forEach(x=>{Object.assign(D.s,x.s||{});D.p.push(...(x.p||[]));Object.assign(D.j,x.j||{});Object.assign(D.ho,x.ho||{});const H=x.hr||{};Object.assign(D.hr.w,H.w||{});D.hr.i.push(...(H.i||[]))});
+  const hr0=res[0].hr||{mt:0,mx:0,b:0},hs0=res[0].hs||{esc:0,done:0};
+  const g=h('div',{class:adm?'cal-7dias':'cal-5dias'});
+  for(const ds of days){const s=D.s[ds],p=D.p.filter(x=>x.day===ds),j=D.j[ds],miss=s&&s.type==='T'&&ds<td&&!p.length,late=!!(s&&s.type==='T'&&s.start&&p[0]&&p[0].kind==='in'&&mins(hm(p[0].ts))-mins(s.start)>5);
+   const dt=new Date(ds+'T00:00:00'),st=(miss?(j?'J':'X'):late?(j?'J':'L'):'')+(ds===td?' now':'');
+   g.append(h('div',{class:(adm?'dia-compacto':'dia-semana')+(D.ho[ds]?' H':'')+(st?' '+st:'')},
+    h('div',{class:adm?'dia-nome-compacto':'dia-semana-nome'},['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][dt.getDay()]),
+    h('div',{class:adm?'dia-num-compacto':'dia-num'},dt.getDate()),
+    D.ho[ds]&&h('small',{class:'hol'},'Feriado: '+D.ho[ds]),
+    h('div',{class:(adm?'dia-turno-compacto':'dia-turno')+' '+(s?(s.type==='T'?'t':s.type==='V'?'v':'f'):'f')},s?(s.type==='T'?(s.start||'')+'-'+(s.end||''):s.type==='F'?'Folga':'Férias'):'—'),
+    ...p.map(x=>h('span',{class:'marcacao'+(adm?'-compacta':'')+' '+(x.kind==='in'?'in':'out')},(x.kind==='in'?'E ':'S ')+hm(x.ts))),
+    D.hr.w[ds]!=null&&h('small',{},`⏱ ${fmt(D.hr.w[ds])}`+(D.hr.w[ds]>480?` (+${fmt(D.hr.w[ds]-480)})`:'')),
+    D.hr.i.includes(ds)&&h('small',{},'⚠ sem saída'),
+    (s&&s.type==='T'&&ds>td&&!p.length)&&h('small',{},'Sem marcação'),
+    adm&&btn('✎',()=>edit(ds,p)),
+    miss&&(j?(adm?btn('Ver foto',()=>photo(j)):h('small',{},'Justificada')):(adm?h('small',{},'Falta'):btn('Justificar',()=>just(ds)))),
+    late&&(j?(adm?btn('Ver foto (atraso)',()=>photo(j)):h('small',{},'Atraso justificado')):(adm?h('small',{},'⚠ Atraso'):btn('Justificar atraso',()=>just(ds))))))}
+  box.replaceChildren(h('p',{class:'sum'},`Este mês: ${fmt(hr0.mt)} trabalhadas · ${fmt(hr0.mx)} extra · Banco de horas: ${fmt(hr0.b)} · Feriados ${new Date().getFullYear()}: ${hs0.esc} a trabalhar, ${hs0.done} trabalhados`),
+   h('div',{class:adm?'semana-header-compacta':'semana-header'},h('button',{class:adm?'btn-seta-compacto':'btn-seta',id:adm?'btn7-ant':'btn5-ant',type:'button',onclick:()=>go(-1)},'‹'),h('div',{class:adm?'semana-label-compacta':'semana-label'},label()),h('button',{class:adm?'btn-seta-compacto':'btn-seta',id:adm?'btn7-prox':'btn5-prox',type:'button',onclick:()=>go(1)},'›')),
+   g)}catch(x){alert(x.message)}};
  box.load();return box}
 function dcal(id,name){const box=h('div'),ed=h('div'),td=new Date().toLocaleDateString('sv-SE'),sn=h('input',{placeholder:'Turno (ex: Manhã)',maxlength:30}),s1=h('input',{type:'time'}),s2=h('input',{type:'time'}),b1=h('input',{type:'time'}),b2=h('input',{type:'time'});let m=td.slice(0,7),D={r:[],sh:[],us:[]};
  const go=n=>{const[y,mo]=m.split('-').map(Number),d=new Date(y,mo-1+n,1);m=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');box.load()};
  const edit=ds=>{const rows=D.r.filter(x=>x.day===ds),sels=D.us.map(u=>{const r=rows.find(x=>x.uid===u.id),vac=r&&r.type==='V',s=h('select',{},h('option',{value:0},'Folga'),...D.sh.map(x=>h('option',{value:x.id},`${x.name} ${x.start}-${x.end}`)));
    if(vac){s.replaceChildren(h('option',{},'Férias'));s.disabled=true}else if(r&&r.type==='T'){const c=D.sh.find(x=>x.start===r.start&&x.end===r.end);if(c)s.value=c.id;else{s.append(h('option',{value:-1},`Manter ${r.start||''}-${r.end||''}`));s.value=-1}}
    return[u,s,vac]});
-  ed.replaceChildren(h('h4',{},`Dia ${ds}`),D.sh.length?null:h('p',{},'Crie primeiro os turnos do departamento (abaixo).'),...sels.map(([u,s])=>h('div',{},u.name+': ',s,...(D.av||[]).filter(a=>a.uid===u.id&&a.d1<=ds&&a.d2>=ds).map(a=>h('small',{class:'X'},` ⚠ ${a.sh?'não pode o turno '+((D.sh.find(t=>t.id===a.sh)||{}).name||''):'pediu folga'}`)))),btn('Guardar dia',async()=>{await api('deptday/'+id,{day:ds,a:sels.filter(x=>!x[2]).map(([u,s])=>({uid:u.id,shift:Number(s.value)}))});box.load()}),btn('Fechar',()=>ed.replaceChildren()))};
+   ed.replaceChildren(h('h4',{},`Dia ${ds}`),D.sh.length?null:h('p',{},'Crie primeiro os turnos do departamento (abaixo).'),...sels.map(([u,s])=>h('div',{},u.name+': ',s,...(D.av||[]).filter(a=>a.uid===u.id&&a.d1<=ds&&a.d2>=ds).map(a=>h('small',{class:'X'},` ⚠ ${a.sh?'não pode o turno '+((D.sh.find(t=>t.id===a.sh)||{}).name||''):'pediu folga'}`)))),btn('Guardar dia',async()=>{await api('deptday/'+id,{day:ds,a:sels.filter(x=>!x[2]).map(([u,s])=>({uid:u.id,shift:Number(s.value)}))});box.load()}),btn('Fechar',()=>ed.replaceChildren()))};
  box.load=async()=>{try{D=await api(`deptmonth/${id}?m=${m}`);const by={};D.r.forEach(x=>(by[x.day]=by[x.day]||[]).push(x));const[y,mo]=m.split('-').map(Number),n=new Date(y,mo,0).getDate(),f=(new Date(y,mo-1,1).getDay()+6)%7;
-  const g=h('div',{class:'g w'},...'Seg Ter Qua Qui Sex Sáb Dom'.split(' ').map(x=>h('b',{},x)),...Array(f).fill(0).map(()=>h('i')));
-  const bad=[];for(let i=1;i<=n;i++){const ds=`${m}-${String(i).padStart(2,'0')}`,L=by[ds]||[],k=new Set(L.filter(x=>x.type==='T').map(x=>(x.start||'')+'-'+(x.end||''))).size,w=!!(L.length&&k<2);if(w)bad.push(i);
-   g.append(h('div',{class:'d dd'+(w?' X':'')+(ds===td?' now':''),onclick:()=>edit(ds)},h('b',{},i),w&&h('small',{},k?'⚠ Só 1 turno':'⚠ Sem turnos'),...L.filter(x=>x.type==='T').map(x=>h('small',{class:'T'},`${x.name} ${x.start||''}-${x.end||''}`)),...L.filter(x=>x.type==='V').map(x=>h('small',{class:'V'},`Férias: ${x.name}`))))}
-  ed.replaceChildren();
-  box.replaceChildren(h('h3',{},name),h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},m),btn('▶',()=>go(1))),...(bad.length?[h('p',{class:'X'},`⚠ ${bad.length} dia(s) com cobertura insuficiente (menos de 2 turnos): ${bad.join(', ')}`)]:[]),h('div',{class:'sc'},g),h('small',{},'Clique num dia para atribuir turnos. Quem não for atribuído fica de folga; as férias não são alteradas.'),ed,
-   h('div',{},h('b',{},'Turnos: '),...D.sh.map(x=>h('span',{},`${x.name} ${x.start}-${x.end}${x.brk_s?` (intervalo ${x.brk_s}-${x.brk_e})`:''} `,btn('✕',async()=>{await api(`shifts/${x.id}/del`,{});box.load()}),' ')),h('p',{},sn,'Início ',s1,' Fim ',s2,' Intervalo de descanso (opcional): ',b1,' até ',b2,btn('Adicionar turno',async()=>{await api('shifts',{dept:id,name:sn.value,start:s1.value,end:s2.value,bs:b1.value||null,be:b2.value||null});sn.value=s1.value=s2.value=b1.value=b2.value='';box.load()}))))}catch(x){alert(x.message)}};
+   const g=h('div',{class:'g w'},...'Seg Ter Qua Qui Sex Sáb Dom'.split(' ').map(x=>h('b',{},x)),...Array(f).fill(0).map(()=>h('i')));
+   const bad=[];for(let i=1;i<=n;i++){const ds=`${m}-${String(i).padStart(2,'0')}`,L=by[ds]||[],k=new Set(L.filter(x=>x.type==='T').map(x=>(x.start||'')+'-'+(x.end||''))).size,w=!!(L.length&&k<2);if(w)bad.push(i);
+    g.append(h('div',{class:'d dd'+(w?' X':'')+(ds===td?' now':''),onclick:()=>edit(ds)},h('b',{},i),w&&h('small',{},k?'⚠ Só 1 turno':'⚠ Sem turnos'),...L.filter(x=>x.type==='T').map(x=>h('small',{class:'T'},`${x.name} ${x.start||''}-${x.end||''}`)),...L.filter(x=>x.type==='V').map(x=>h('small',{class:'V'},`Férias: ${x.name}`))))}
+   ed.replaceChildren();
+   box.replaceChildren(h('h3',{},name),h('div',{class:'semana-header'},h('button',{class:'btn-seta',type:'button',onclick:()=>go(-1)},'‹'),h('div',{class:'semana-label'},m),h('button',{class:'btn-seta',type:'button',onclick:()=>go(1)},'›')),...(bad.length?[h('p',{class:'X'},`⚠ ${bad.length} dia(s) com cobertura insuficiente (menos de 2 turnos): ${bad.join(', ')}`)]:[]),h('div',{class:'sc'},g),h('small',{},'Clique num dia para atribuir turnos. Quem não for atribuído fica de folga; as férias não são alteradas.'),ed,
+    h('div',{},h('b',{},'Turnos: '),...D.sh.map(x=>h('span',{},`${x.name} ${x.start}-${x.end}${x.brk_s?` (intervalo ${x.brk_s}-${x.brk_e})`:''} `,btn('✕',async()=>{await api(`shifts/${x.id}/del`,{});box.load()}),' ')),h('p',{},sn,'Início ',s1,' Fim ',s2,' Intervalo de descanso (opcional): ',b1,' até ',b2,btn('Adicionar turno',async()=>{await api('shifts',{dept:id,name:sn.value,start:s1.value,end:s2.value,bs:b1.value||null,be:b2.value||null});sn.value=s1.value=s2.value=b1.value=b2.value='';box.load()}))))}catch(x){alert(x.message)}};
  box.load();return box}
 function certs(uid,adm){const box=h('div'),t=h('input',{placeholder:'Título (ex: Formação HACCP)',maxlength:80}),f=h('input',{type:'file',accept:'image/*,application/pdf'});
  const open=async x=>{const u=URL.createObjectURL(await api('cert/'+x.id,null,true));if(x.mime==='application/pdf'){const a=h('a',{href:u,download:'certificado.pdf'});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),9e3)}else document.body.append(h('img',{class:'ph',src:u,onclick:e=>{e.target.remove();URL.revokeObjectURL(u)}}))};
  const ld=async()=>{const d=await api('certs/'+uid);box.replaceChildren(h('h3',{},'Certificados de formação'),...d.r.map(x=>h('div',{},new Date(x.ts).toLocaleDateString('pt-PT')+' · '+x.title+' ',btn('Abrir',()=>open(x)),btn('Apagar',async()=>{if(confirm('Apagar?')){await api(`cert/${x.id}/del`,{});ld()}}))),...(adm?[]:[h('p',{},t,f,btn('Enviar',async()=>{const file=f.files[0];if(!file||!t.value.trim())throw Error('Indique título e ficheiro');
-  let bl=file;if(file.type==='application/pdf'){if(file.size>5e5)throw Error('PDF até 500KB')}else bl=await shrink(file);
-  const fd=new FormData();fd.append('title',t.value);fd.append('file',bl,file.type==='application/pdf'?'c.pdf':'c.jpg');await api('certs',fd);t.value='';f.value='';ld()}))]))};
+   let bl=file;if(file.type==='application/pdf'){if(file.size>5e5)throw Error('PDF até 500KB')}else bl=await shrink(file);
+   const fd=new FormData();fd.append('title',t.value);fd.append('file',bl,file.type==='application/pdf'?'c.pdf':'c.jpg');await api('certs',fd);t.value='';f.value='';ld()}))]))};
  ld().catch(x=>alert(x.message));return box}
 const pos=()=>new Promise((ok,no)=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>ok(p.coords),()=>no(Error('Ative a localização no telemóvel/browser para marcar ponto')),{enableHighAccuracy:true,timeout:15000,maximumAge:0}):no(Error('Localização indisponível')));
 const BUFFER_MIN=10;
 let UP='ponto';
-const utabs=()=>{const b=h('b',{});api('unread').then(d=>{b.textContent=d.c?` (${d.c})`:''}).catch(()=>{});return h('div',{class:'tabs'},...[['ponto','Ponto'],['form','Formações'],['av','Pedidos'],['rec','Recados'],...(me.chief?[['mg','Gestão']]:[])].map(([k,t])=>h('button',{class:k===UP?'on':'',onclick:()=>{if(k==='mg'){AP='inicio';admin()}else{UP=k;user()}}},t,k==='rec'?b:null)))};
-function upage(){const m=h('div');show(head(),utabs(),m);(UP==='form'?pForm(m,false):UP==='av'?pAv(m):pRec(m)).catch(x=>alert(x.message))}
+/* Design System secção 3.1: tabs com data-page e classe .active */
+const utabs=()=>{const b=h('b',{});api('unread').then(d=>{b.textContent=d.c?` (${d.c})`:''}).catch(()=>{});return h('nav',{class:'tabs'},...[['ponto','Ponto'],['form','Formações'],['av','Pedidos'],['rec','Recados'],...(me.chief?[['mg','Gestão']]:[])].map(([k,t])=>h('button',{class:k===UP?'active':'','data-page':k,onclick:()=>{if(k==='mg'){AP='inicio';admin()}else{UP=k;user()}}},t,k==='rec'?b:null)))};
+function upage(){const m=h('main',{class:'app-main'});show(head(),utabs(),m);(UP==='form'?pForm(m,false):UP==='av'?pAv(m):pRec(m)).catch(x=>alert(x.message))}
 async function pRec(m){const d=await api('msgs');m.append(h('h2',{},'Recados da direção'),...(d.r.length?d.r.map(x=>h('div',{class:'card'+(x.seen?'':' J')},h('b',{},x.title),h('small',{},' '+dt(x.ts)),h('p',{class:'pre'},x.body))):[h('p',{},'Sem recados.')]));if(d.r.some(x=>!x.seen))api('msgs/readall',{}).catch(()=>{})}
-function user(){document.body.className='';if(UP!=='ponto')return upage();const st=h('p'),b=h('button',{class:'big',onclick:async()=>{try{const g=await pos();const now=new Date();let at=null;try{const td=now.toLocaleDateString('sv-SE');const d=await api(`month/${me.id}?m=${td.slice(0,7)}`);const s=d.s?.[td];if(s&&s.type==='T'){if(b.dataset.k==='in'&&s.start){const sh=new Date(td+'T'+s.start+':00');if(Math.abs(now-sh)<=BUFFER_MIN*60000)at=sh.toISOString();}if(b.dataset.k==='out'&&s.end){const sh=new Date(td+'T'+s.end+':00');if(Math.abs(now-sh)<=BUFFER_MIN*60000)at=sh.toISOString();}}}catch{}await api('punch',{kind:b.dataset.k,lat:g.latitude,lng:g.longitude,acc:g.accuracy,...(at?{at}:{})});await t();c.load()}catch(x){alert(x.message)}}}),c=cal(me.id,false);
- async function t(){const d=await api('today'),l=d.p.at(-1),k=l&&l.kind==='in'?'out':'in';b.dataset.k=k;b.textContent=k==='in'?'Marcar ENTRADA':'Marcar SAÍDA';st.textContent=d.p.map(x=>(x.kind==='in'?'E ':'S ')+hm(x.ts)).join(' · ')||'Sem marcações hoje'}
+/* Design System secção 3.1/3.3: main + section + botão fixo .fixo-bottom
+   Botão: ▶ Registar Entrada (verde, data-k="in") / ◼ Registar Saída (vermelho, data-k="out") */
+function user(){document.body.className='';if(UP!=='ponto')return upage();const st=h('p'),b=h('button',{class:'big',type:'button','data-k':'in',onclick:async()=>{try{const g=await pos();const now=new Date();let at=null;try{const td=now.toLocaleDateString('sv-SE');const d=await api(`month/${me.id}?m=${td.slice(0,7)}`);const s=d.s?.[td];if(s&&s.type==='T'){if(b.dataset.k==='in'&&s.start){const sh=new Date(td+'T'+s.start+':00');if(Math.abs(now-sh)<=BUFFER_MIN*60000)at=sh.toISOString();}if(b.dataset.k==='out'&&s.end){const sh=new Date(td+'T'+s.end+':00');if(Math.abs(now-sh)<=BUFFER_MIN*60000)at=sh.toISOString();}}}catch{}await api('punch',{kind:b.dataset.k,lat:g.latitude,lng:g.longitude,acc:g.accuracy,...(at?{at}:{})});await t();c.load()}catch(x){alert(x.message)}}}),c=cal(me.id,false);
+ async function t(){const d=await api('today'),l=d.p.at(-1),k=l&&l.kind==='in'?'out':'in';b.dataset.k=k;b.textContent=k==='in'?'▶ Registar Entrada':'◼ Registar Saída';st.textContent=d.p.map(x=>(x.kind==='in'?'E ':'S ')+hm(x.ts)).join(' · ')||'Sem marcações hoje'}
  const vr=h('div'),a=h('input',{type:'date'}),z=h('input',{type:'date'});
  async function lv(){const d=await api('vr');vr.replaceChildren(h('p',{class:'sum'},vs(d.s)),...d.r.map(x=>h('div',{},`${x.d1} → ${x.d2}: ${{pend:'pendente',ok:'aprovado',no:'recusado',can:'cancelado'}[x.st]} `,x.st==='pend'&&btn('Cancelar',async()=>{await api(`vr/${x.id}/cancel`,{});lv()}))))}
  const jd=h('input',{type:'date',max:td0()}),jfile=h('input',{type:'file',accept:'image/*'}),jf=h('p',{},jd,jfile,btn('Enviar justificação',async()=>{if(!jd.value||!jfile.files[0])throw Error('Escolha o dia e a foto');const fd=new FormData();fd.append('day',jd.value);fd.append('file',await shrink(jfile.files[0]),'j.jpg');await api('justify',fd);jfile.value='';alert('Justificação enviada');c.load()}));
- show(head(),utabs(),h('p',{},b),st,c,h('h3',{},'Justificar falta ou atraso'),jf,h('h3',{},'Pedir férias'),h('p',{},a,z,btn('Pedir',async()=>{await api('vr',{from:a.value,to:z.value});lv()})),vr);t().catch(()=>{});lv().catch(()=>{})}
+ show(head(),utabs(),h('main',{class:'app-main'},h('section',{class:'active'},st,c,h('h3',{},'Justificar falta ou atraso'),jf,h('h3',{},'Pedir férias'),h('p',{},a,z,btn('Pedir',async()=>{await api('vr',{from:a.value,to:z.value});lv()})),vr)),h('div',{class:'fixo-bottom'},b));t().catch(()=>{});lv().catch(()=>{})}
 const link=t=>prompt('Envie este link ao utilizador (válido 48h):',location.origin+location.pathname+'#invite='+t);
 let AP='inicio',TM=0;
+/* Design System secção 4.1/4.2: admin com tabs horizontais, sem sidebar,
+   sem botão fixo. Conteúdo em .admin-main. */
 function admin(){clearInterval(TM);const A=me.role==='admin';if(!A&&!me.chief)return user();document.body.className='wide';
- const main=h('div',{class:'main'}),bd=h('b',{}),items=A?[['inicio','Início'],['users','Utilizadores'],['depts','Departamentos'],['ferias','Pedidos de férias'],['just','Justificações'],['form','Formações'],['av','Pedidos de folga/turno'],['res','Resumo mensal'],['mapa','Mapa de trabalho'],['fer','Feriados'],['rec','Recados'],['seg','Segurança']]:[['inicio','Início'],['dept','Horário do departamento'],['just','Justificações'],['av','Pedidos de folga/turno'],['res','Resumo mensal'],['_me','Área pessoal']];
+ const main=h('div',{class:'admin-main',id:'adminMain'}),bd=h('b',{}),items=A?[['inicio','Início'],['users','Utilizadores'],['depts','Departamentos'],['ferias','Pedidos de férias'],['just','Justificações'],['form','Formações'],['av','Pedidos de folga/turno'],['res','Resumo mensal'],['mapa','Mapa de trabalho'],['fer','Feriados'],['rec','Recados'],['seg','Segurança']]:[['inicio','Início'],['dept','Horário do departamento'],['just','Justificações'],['av','Pedidos de folga/turno'],['res','Resumo mensal'],['_me','Área pessoal']];
  if(!items.some(i=>i[0]===AP))AP='inicio';
- show(head(),h('div',{class:'adm'},h('nav',{class:'side'},...items.map(([k,t])=>h('button',{class:k===AP?'on':'',onclick:()=>{if(k==='_me'){UP='ponto';user()}else{AP=k;admin()}}},t,k==='ferias'?bd:null))),main));
+ show(head(),h('nav',{class:'tabs adm-tabs',id:'adminTabs'},...items.map(([k,t])=>h('button',{class:k===AP?'active':'','data-page':k,onclick:()=>{if(k==='_me'){UP='ponto';user()}else{AP=k;admin()}}},t,k==='ferias'?bd:null))),main);
  ({inicio:pInicio,users:pUsers,depts:pDepts,ferias:pFerias,just:pJust,form:m=>pForm(m,true),av:pAvail,res:pResumo,mapa:pMapa,fer:pFer,rec:pRecados,seg:pSeg,dept:async m=>{m.append(dcal(me.dept,me.dn||'Departamento'))}})[AP](main).catch(x=>alert(x.message));
  if(A)api('vr/all').then(d=>{bd.textContent=d.r.length?` (${d.r.length})`:''}).catch(()=>{});
  if(AP==='inicio')TM=setInterval(()=>{if(!document.hidden)admin()},60000)}
 async function pInicio(m){const d=await api('onduty');
- m.append(h('div',{class:'top'},h('h2',{},'Em serviço agora'),h('span',{},`Atualizado às ${hm(Date.now())} `,btn('Atualizar',()=>admin()))),
+ m.append(h('div',{class:'section-head'},h('h2',{},'Em serviço agora'),h('span',{},`Atualizado às ${hm(Date.now())} `,btn('Atualizar',()=>admin()))),
   ...d.d.map(x=>{const n=x.u.filter(u=>u.st==='in').length;return h('div',{class:'card'+(n?'':' X')},h('h3',{},`${x.name}: ${n} em serviço`),x.u.length?h('table',{},...x.u.map(u=>h('tr',{},h('td',{},u.name),h('td',{},u.st==='in'?`Em serviço desde ${hm(u.ts)}`:`⚠ Escalado ${u.start}-${u.end}, ainda sem entrada`)))):h('p',{},'Ninguém em serviço'))}))}
 async function pUsers(m){const[d,e]=await Promise.all([api('users'),api('depts')]),ds=e.r,list=h('div'),det=h('div'),nm=h('input',{placeholder:'Nome',maxlength:60}),un=h('input',{placeholder:'utilizador',maxlength:30});
  const opts=u=>{const s=h('select',{onchange:async()=>{try{await api(`users/${u.id}/dept`,{dept:s.value?Number(s.value):null});ref()}catch(x){alert(x.message)}}},h('option',{value:''},'Sem departamento'),...ds.map(x=>h('option',{value:x.id},x.name)));s.value=u.dept||'';return s};
@@ -133,7 +164,7 @@ async function pForm(m,adm){const td=new Date().toLocaleDateString('sv-SE');let 
   x.day<=td?h('p',{},f,btn('Enviar certificado',async()=>{const file=f.files[0];if(!file)throw Error('Escolha o ficheiro');let bl=file;if(file.type==='application/pdf'){if(file.size>5e5)throw Error('PDF até 500KB')}else bl=await shrink(file);const fd=new FormData();fd.append('tr',x.id);fd.append('file',bl,file.type==='application/pdf'?'c.pdf':'c.jpg');await api('certs',fd);reload()})):h('small',{},'O envio do certificado abre no dia da formação.'))},
  load=async()=>{D=(await api(`trainings?m=${mo}`)).r;const[y,k]=mo.split('-').map(Number),n=new Date(y,k,0).getDate(),f=(new Date(y,k-1,1).getDay()+6)%7,g=h('div',{class:'g'},...WD.map(x=>h('b',{},x)),...Array(f).fill(0).map(()=>h('i')));
   for(let i=1;i<=n;i++){const day=`${mo}-${String(i).padStart(2,'0')}`;g.append(h('div',{class:'d'+(adm?' dd':'')+(day===td?' now':''),onclick:()=>{if(adm)add(day)}},h('b',{},i),...D.filter(x=>x.day===day).map(x=>h('small',{class:'V'},when(x)+x.title))))}
-  ed.replaceChildren();box.replaceChildren(h('div',{class:'nav'},btn('◀',()=>go(-1)),h('b',{},mo),btn('▶',()=>go(1))),g,btn('Descarregar calendário (.ics)',()=>saveAs(new Blob([ics(D)],{type:'text/calendar'}),`formacoes_${mo}.ics`)),adm?btn('Nova formação',()=>add(td)):null,ed,h('h3',{},'Formações do mês'),...(D.length?D.map(adm?at:ut):[h('p',{},'Sem formações neste mês.')]),adm?h('p',{},h('small',{},'Clique num dia do calendário para criar uma formação.')):null,adm?h('p',{},btn('Certificados sem formação associada',async()=>{if(orph.firstChild)orph.replaceChildren();else await showCerts(orph,'none','sem_formacao')}),orph):null)};
+  ed.replaceChildren();box.replaceChildren(h('div',{class:'semana-header'},h('button',{class:'btn-seta',type:'button',onclick:()=>go(-1)},'‹'),h('div',{class:'semana-label'},mo),h('button',{class:'btn-seta',type:'button',onclick:()=>go(1)},'›')),g,btn('Descarregar calendário (.ics)',()=>saveAs(new Blob([ics(D)],{type:'text/calendar'}),`formacoes_${mo}.ics`)),adm?btn('Nova formação',()=>add(td)):null,ed,h('h3',{},'Formações do mês'),...(D.length?D.map(adm?at:ut):[h('p',{},'Sem formações neste mês.')]),adm?h('p',{},h('small',{},'Clique num dia do calendário para criar uma formação.')):null,adm?h('p',{},btn('Certificados sem formação associada',async()=>{if(orph.firstChild)orph.replaceChildren();else await showCerts(orph,'none','sem_formacao')}),orph):null)};
  m.append(h('h2',{},'Formações e certificados'),box);await reload()}
 const csvc=v=>{let s=String(v);if(/^[=+\-@\t\r]/.test(s))s="'"+s;return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
 async function pResumo(m){const mi=h('input',{type:'month',value:td0().slice(0,7)}),fd=h('select',{onchange:()=>draw()}),box=h('div');let D={rows:[],depts:[]};
